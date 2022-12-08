@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: elk-dev
+  labels:
+    app: es01
+  name: es01
+spec:
+  clusterIP: "None"
+  ports:
+    - name: elasticsearch
+      port: 9200
+      targetPort: elasticsearch
+    - name: transport
+      port: 9300
+      targetPort: transport
+  selector:
+    app: es01
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: elk-dev
+  labels:
+    app: es02
+  name: es02
+spec:
+  clusterIP: "None"
+  ports:
+    - name: elasticsearch
+      port: 9200
+      targetPort: elasticsearch
+    - name: transport
+      port: 9300
+      targetPort: transport
+  selector:
+    app: es02
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: elk-dev
+  labels:
+    app: es03
+  name: es03
+spec:
+  clusterIP: "None"
+  ports:
+    - name: elasticsearch
+      port: 9200
+      targetPort: elasticsearch
+    - name: transport
+      port: 9300
+      targetPort: transport
+  selector:
+    app: es03

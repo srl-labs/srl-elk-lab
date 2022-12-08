@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: elk-dev
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  labels:
+    app: logstash
+    svc: logstash
+  name: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      labels:
+        app: logstash
+        svc: logstash
+    spec:
+      containers:
+        - name: log-debug
+          image: rockylinux:8.6
+          command: ['sh', '-c', 'while true; do sleep 120; done']
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "100m"
+          volumeMounts:
+            - mountPath: /logs
+              name: logs
+        - image: bootstrap:5443/logstash:7.17.7
+          name: logstash
+          ports:
+            - name: syslog-cisco
+              containerPort: 1514
+              protocol: "UDP"
+            - name: syslog
+              containerPort: 1515
+              protocol: "UDP"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+            limits:
+              memory: "2G"
+              cpu: "500m"
+          volumeMounts:
+            - mountPath: /logs
+              name: logs
+            - mountPath: /usr/share/logstash/config/logstash.yml
+              name: logstash-config
+              subPath: logstash.yml
+            - mountPath: /usr/share/logstash/pipeline/01-srl.main.conf
+              name: logstash-config
+              subPath: 01-srl.main.conf
+            - mountPath: /var/lib/logstash/patterns/patterns
+              name: logstash-config
+              subPath: patterns
+      # initContainers:
+      #   - name: setup
+      #     image: rockylinux:8.6
+      #     command: ["/bin/bash", "-c"]
+      #     args:
+      #       - cd /logs && rm -rf *;
+      #         chmod g+w /logs;
+      #         chown 1000:0 /logs;
+      #         if [[ ! -d /logs/data ]]; 
+      #         then 
+      #         mkdir /logs/data;
+      #         chown 1000:0 /logs/data;
+      #         chmod g+w /logs/data;
+      #         fi;
+      #     volumeMounts:
+      #       - mountPath: /logs
+      #         name: logs
+      restartPolicy: Always
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: logstash-logs
+        - name: logstash-config
+          configMap: 
+            name: logstash-config
+

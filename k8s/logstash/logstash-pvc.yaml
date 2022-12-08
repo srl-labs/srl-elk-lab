@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: logstash-logs
+  namespace: elk-dev
+  labels:
+    app: logstash
+spec:
+  storageClassName: "infra-stor0-nfs"
+  volumeMode: Filesystem
+  volumeName: logstash-logs-elk-infra0-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10G

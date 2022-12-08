@@ -1,0 +1,12 @@
+node.name: logstash
+pipeline.workers: 4
+pipeline.batch.size: 256
+path.config: "/usr/share/logstash/pipeline/*.main.conf"
+queue.type: persisted
+path.queue: /logs/pqueue
+api.environment: dev
+api.http.host: "0.0.0.0"
+api.http.port: 9700
+path.logs: /logs
+path.data: /logs/data
+log.level: info

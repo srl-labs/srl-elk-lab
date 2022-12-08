@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: elk-dev
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  labels:
+    app: kibana
+    svc: kibana
+  name: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      labels:
+        app: kibana
+        svc: kibana
+    spec:
+      containers:
+        - image: bootstrap:5443/kibana:7.17.7
+          name: kibana
+          ports:
+            - name: kibana
+              containerPort: 5601
+          resources:
+            limits:
+              memory: "2G"
+              cpu: "500m"
+          volumeMounts:
+            - mountPath: /usr/share/kibana/config/kibana.yml
+              name: kibana-config
+              subPath: kibana.yml
+      volumes:
+        - name: kibana-config
+          configMap: 
+            name: kibana-config
+      restartPolicy: Always
+

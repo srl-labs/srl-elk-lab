@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: elk-dev
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  labels:
+    app: es-log-dev
+  name: es-log-dev
+spec:
+  clusterIP: 10.10.18.205
+  ports:
+    - name: elasticsearch
+      port: 9200
+      targetPort: 9200
+  selector:
+    svc: es-log-dev
+  externalTrafficPolicy: Local
+  sessionAffinity: ClientIP
+  type: LoadBalancer
+

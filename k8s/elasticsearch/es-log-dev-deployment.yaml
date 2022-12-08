@@ -1,0 +1,224 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: elk-dev
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  labels:
+    app: es-log-dev
+  name: es01
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: es01
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      labels:
+        app: es01
+        svc: es-log-dev
+    spec:
+      containers:
+        - env:
+            - name: ES_JAVA_OPTS
+              value: -Xms1G -Xmx1G
+            - name: bootstrap.memory_lock
+              value: "false"
+            - name: cluster.initial_master_nodes
+              value: es01,es02,es03
+            - name: cluster.name
+              value: es-log-dev
+            - name: discovery.seed_hosts
+              value: es02,es03
+            - name: node.name
+              value: es01
+            - name: xpack.security.enabled
+              value: "false"
+          image: bootstrap:5443/elasticsearch:7.17.7
+          name: es01
+          ports:
+            - name: elasticsearch
+              containerPort: 9200
+            - name: transport
+              containerPort: 9300
+          resources:
+            limits:
+              memory: "2G"
+              cpu: "500m"
+          volumeMounts:
+            - mountPath: /usr/share/elasticsearch/data
+              name: data01
+      initContainers:
+        - name: setup
+          image: rockylinux:8.6
+          command: ["/bin/bash", "-c"]
+          args:
+            - chmod g+w /usr/share/elasticsearch/data;
+              cd /usr/share/elasticsearch/data;
+              rm -rf *;
+              chown 1000:0 /usr/share/elasticsearch/data;
+          volumeMounts:
+            - mountPath: /usr/share/elasticsearch/data
+              name: data01
+      restartPolicy: Always
+      volumes:
+        - name: data01
+          persistentVolumeClaim:
+            claimName: data01
+...
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: elk-dev
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  labels:
+    app: es-log-dev
+  name: es02
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: es02
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      labels:
+        app: es02
+        svc: es-log-dev
+    spec:
+      containers:
+        - env:
+            - name: ES_JAVA_OPTS
+              value: -Xms1G -Xmx1G
+            - name: bootstrap.memory_lock
+              value: "false"
+            - name: cluster.initial_master_nodes
+              value: es01,es02,es03
+            - name: cluster.name
+              value: es-log-dev
+            - name: discovery.seed_hosts
+              value: es01,es03
+            - name: node.name
+              value: es02
+            - name: xpack.security.enabled
+              value: "false"
+          image: bootstrap:5443/elasticsearch:7.17.7
+          name: es02
+          ports:
+            - name: elasticsearch
+              containerPort: 9200
+            - name: transport
+              containerPort: 9300
+          resources:
+            limits:
+              memory: "2G"
+              cpu: "500m"
+          volumeMounts:
+            - mountPath: /usr/share/elasticsearch/data
+              name: data02
+      initContainers:
+        - name: setup
+          image: rockylinux:8.6
+          command: ["/bin/bash", "-c"]
+          args:
+            - chmod g+w /usr/share/elasticsearch/data;
+              cd /usr/share/elasticsearch/data;
+              rm -rf *;
+              chown 1000:0 /usr/share/elasticsearch/data;
+          volumeMounts:
+            - mountPath: /usr/share/elasticsearch/data
+              name: data02
+      restartPolicy: Always
+      volumes:
+        - name: data02
+          persistentVolumeClaim:
+            claimName: data02
+...
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: elk-dev
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  labels:
+    app: es-log-dev
+  name: es03
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: es03
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      labels:
+        app: es03
+        svc: es-log-dev
+    spec:
+      containers:
+        - env:
+            - name: ES_JAVA_OPTS
+              value: -Xms1G -Xmx1G
+            - name: bootstrap.memory_lock
+              value: "false"
+            - name: cluster.initial_master_nodes
+              value: es01,es02,es03
+            - name: cluster.name
+              value: es-log-dev
+            - name: discovery.seed_hosts
+              value: es01,es02
+            - name: node.name
+              value: es03
+            - name: xpack.security.enabled
+              value: "false"
+          image: bootstrap:5443/elasticsearch:7.17.7
+          name: es03
+          ports:
+            - name: elasticsearch
+              containerPort: 9200
+            - name: transport
+              containerPort: 9300
+          resources:
+            limits:
+              memory: "2G"
+              cpu: "500m"
+          volumeMounts:
+            - mountPath: /usr/share/elasticsearch/data
+              name: data03
+      initContainers:
+        - name: setup
+          image: rockylinux:8.6
+          command: ["/bin/bash", "-c"]
+          args:
+            - chmod g+w /usr/share/elasticsearch/data;
+              cd /usr/share/elasticsearch/data;
+              rm -rf *;
+              chown 1000:0 /usr/share/elasticsearch/data;
+          volumeMounts:
+            - mountPath: /usr/share/elasticsearch/data
+              name: data03
+      restartPolicy: Always
+      volumes:
+        - name: data03
+          persistentVolumeClaim:
+            claimName: data03
+...

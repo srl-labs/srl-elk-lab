@@ -1,0 +1,27 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: elk-dev
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  labels:
+    app: logstash
+  name: logstash
+spec:
+  clusterIP: 10.10.18.207
+  ports:
+    - name: syslog-cisco
+      port: 1514
+      targetPort: syslog-cisco
+      protocol: "UDP"
+    - name: syslog
+      port: 514
+      targetPort: syslog
+      protocol: "UDP"
+  selector:
+    svc: logstash
+  externalTrafficPolicy: Local
+  sessionAffinity: ClientIP
+  type: LoadBalancer

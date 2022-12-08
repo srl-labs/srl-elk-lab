@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: elk-dev
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  labels:
+    app: kibana
+  name: kibana
+spec:
+  clusterIP: 10.10.18.206
+  ports:
+    - name: kibana
+      port: 6501
+      targetPort: kibana
+  selector:
+    svc: kibana
+  externalTrafficPolicy: Local
+  sessionAffinity: ClientIP
+  type: LoadBalancer
+

@@ -1,0 +1,106 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+  namespace: elk-dev
+  labels:
+    app: logstash
+data:
+  # Mount under -> /usr/share/logstash/config/
+  logstash.yml: |
+    node.name: logstash
+    pipeline.workers: 4
+    pipeline.batch.size: 256
+    path.config: "/usr/share/logstash/pipeline/*.main.conf"
+    queue.type: persisted
+    path.queue: /logs/pqueue
+    api.environment: dev
+    api.http.host: "0.0.0.0"
+    api.http.port: 9700
+    path.logs: /logs
+    path.data: /logs/data
+    log.level: info
+  # Mount under -> /usr/share/logstash/pipeline/01-srl.main.conf
+  01-srl.main.conf: |
+    input {
+        syslog{
+            port => 1514
+            use_labels => true
+            id => "srlinux"
+            tags => [ "syslog", "srlinux" ]
+        }
+    }
+
+    filter {
+        if "srlinux" in [tags] {
+            grok {
+                patterns_dir => [ "/var/lib/logstash/patterns" ]
+                match => { "message" => "%{SRLPROC:srlproc}\|%{SRLPID:srlpid}\|%{SRLTHR:srlthread}\|%{SRLSEQ:srlsequence}(?<message>(.*))" }
+                overwrite => [ "message" ]
+                add_field => { "host.ip" => "%{host}" }
+                add_field => { "host.name" => "%{logsource}" }
+            }
+
+            grok {
+                patterns_dir => [ "/var/lib/logstash/patterns" ]
+                match => { "message" => [
+                    "\|%{SRLDOT:garbage1}: %{SRLGRBG:garbage2}etwork-instance %{SRLNETINST:srlnetinst}(?<message>(.*))",
+                    "\|%{SRLDOT:garbage1}: (?<message>(.*))"
+                    ] }
+                overwrite => [ "message" ]
+                remove_field => [ "@version", "host", "logsource", "garbage1", "garbage2" ]
+            }
+            
+            date {
+                match => [ "timestamp",
+                "MMM  d YYYY HH:mm:ss.SSS",
+                "MMM d YYYY HH:mm:ss.SSS",
+                "MMM dd YYYY HH:mm:ss.SSS",
+                "MMM  d HH:mm:ss.SSS",
+                "MMM dd HH:mm:ss",
+                "YYYY MMM dd HH:mm:ss.SSS ZZZ",
+                "YYYY MMM dd HH:mm:ss ZZZ",
+                "YYYY MMM dd HH:mm:ss.SSS",
+                "ISO8601"
+                ]
+                timezone => "Europe/Rome"
+            }
+
+        }
+    }
+
+    output {
+        if "srlinux" in [tags] {
+            if "_grokparsefailure" in [tags] {
+                file {
+                    path => "/logs/fail_to_parse_srl.log"
+                    codec => rubydebug
+                }
+            } else {
+                elasticsearch {
+                            hosts => ["http://es01"]
+                            ssl => false
+                            manage_template => false
+                            index           => "fabric-logs-%{+YYYY.MM.dd}"
+                            id => "fabric-logs"
+                }
+            }
+        }
+        
+    }
+  # Mount under -> /var/lib/logstash/patterns
+  patterns: |
+    MSEC (?:[0-9]{3})
+    IPV4 ((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]))
+    SRLPROC (?:[a-zA-Z0-9\-]+)
+    SRLPID (?:[0-9]+)
+    SRLTHR (?:[0-9]+)
+    SRLSEQ (?:[0-9]+)
+    SRLDOT ([A-Z])
+    SRLGRBG ([a-zA-Z0-1:\- ]+ [N|n])
+    SRLNETINST ([a-zA-Z0-9\-_]+)
+
+    
+  
+

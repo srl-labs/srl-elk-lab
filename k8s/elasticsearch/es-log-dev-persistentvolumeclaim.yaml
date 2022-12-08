@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data01
+  namespace: elk-dev
+  labels:
+    app: es-log-dev
+spec:
+  storageClassName: "infra-stor0-nfs"
+  volumeMode: Filesystem
+  volumeName: data01-elk-infra0-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 120G
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data02
+  namespace: elk-dev
+  labels:
+    app: es-log-dev
+spec:
+  storageClassName: "infra-stor0-nfs"
+  volumeMode: Filesystem
+  volumeName: data02-elk-infra0-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 120G
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data03
+  namespace: elk-dev
+  labels:
+    app: es-log-dev
+spec:
+  storageClassName: "infra-stor0-nfs"
+  volumeMode: Filesystem
+  volumeName: data03-elk-infra0-nfs
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 120G

@@ -1,0 +1,11 @@
+username: admin
+password: admin
+log-file: ./gnmic.log
+tls-ca: /home/azyablov/clab/srl-elk-lab/clab-srl-elk-lab/ca/root/root-ca.pem
+tls-cert: /home/azyablov/clab/srl-elk-lab/clab-srl-elk-lab/ca/srl-elk-3-2/srl-elk-3-2.pem 
+tls-key: /home/azyablov/clab/srl-elk-lab/clab-srl-elk-lab/ca/srl-elk-3-2/srl-elk-3-2-key.pem
+skip-verify: true
+timeout: 30s
+encoding: json_ietf
+targets:
+
