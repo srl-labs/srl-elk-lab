@@ -1,13 +1,13 @@
 # Intro
 
-In old ages reading log files was normal excercise for sysadmin guru with assistnace of old school and robust tools grep/egrep, awk, sed.
+In old ages reading log files was normal excercise for sysadmin guru with assistnace of old school and robust tools like grep/egrep, awk, sed...
 Today's infrastructure requirements go well beyond just looking for the root cause why your application is crashing, inforectly configured or ... just to realise that port occupied by another applciation.
-For sure topics related to ML, intrusion detection, security analysis and just keeping logs in structured form and programmatically accessible way are becoming a norm for system design and architecture.
+For sure topics related to ML, close-loop automation, intrusion detection, security analysis and just keeping logs in structured form and programmatically accessible way are becoming a norm for system design and architecture.
 
 # Lab Topology
 
 This lab was created to allow easily enter this domain with your SR Linux based fabric.
-clab topology represents 3-tier fabric topology and with 3 container sitting within one L2 domain.
+clab topology represents 3-tier fabric topology and with 3 containers  sitting within one L2 domain.
 
 ![ELK lab topology][topology]
 
