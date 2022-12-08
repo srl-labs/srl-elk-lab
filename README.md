@@ -83,6 +83,8 @@ In case TLS is a requirement, you can cosider to put rsyslog in front, simple do
 
 To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simulation.sh 15``` in case machine is a bit slow or you have another labs running on the same compute.
 
+![Outage Simulation][outage_simulation]
+
 # ELK Stack
 ## Index Template and Mappings
 
@@ -246,3 +248,4 @@ Confugurations were tested on real K8s cluster with Calico CNI and MelalLB as lo
 [kibaba_dashboard]: ./pic/kibana_dashboard.png "Kibana dashboard #1"
 [kibaba_dashboard_2]: ./pic/kibana_dashboard_2.png "Kibana dashboard #2"
 [index_deletion]: ./pic/delete_index.png "Kibana delete index"
+[outage_simulation]: ./pic/outage_smulation.gif "Simulation"
