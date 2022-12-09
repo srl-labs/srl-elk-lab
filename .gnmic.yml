@@ -7,5 +7,4 @@ tls-key: ./clab-elk/ca/srl-3-2/srl-3-2-key.pem
 skip-verify: true
 timeout: 30s
 encoding: json_ietf
-targets:
 

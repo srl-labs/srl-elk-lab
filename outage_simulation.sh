@@ -32,8 +32,6 @@ function set_value_all (){
     done
 }
 
-
-
 function configure_syslog_for_all (){
     local IPINSPPATH="{{.NetworkSettings.Networks.$NETWORK.IPAMConfig.IPv4Address}}"
     local LOGSTASHIP=`docker container inspect clab-srl-elk-lab-logstash -f $IPINSPPATH`
