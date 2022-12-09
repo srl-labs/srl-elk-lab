@@ -4,6 +4,9 @@ In old ages reading log files was normal excercise for sysadmin guru with assist
 Today's infrastructure requirements go well beyond just looking for the root cause why your application is crashing, inforectly configured or ... just to realise that port occupied by another applciation.
 For sure topics related to ML, close-loop automation, intrusion detection, security analysis and just keeping logs in structured form and programmatically accessible way are becoming a norm for system design and architecture.
 
+This lab provides you with SR Linux / ELK playground to collect, handle and manage logs from your network devices. 
+It comes with prefefined pipelines and configurations of ELK stack to let playing w/o hassle with SR Linux, as well as developing log management applications with ready to use infrastructure.
+
 # Lab Topology
 
 This lab was created to allow easily enter this domain with your SR Linux based fabric.
