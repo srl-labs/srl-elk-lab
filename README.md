@@ -42,7 +42,7 @@ curl -X PUT "localhost:9200/_index_template/fabric?pretty" -H 'Content-Type: app
 
 ![Kibana delete index][index_deletion]
 
-5. Run simulation in indest data into elasticsearch as decribed in [Simulation](#simulation)
+5. Run simulation to indest data into elasticsearch as decribed in [Simulation](#simulation)
 
 
 # Simulation
@@ -51,7 +51,7 @@ In order to help quickly enrich ELK stack with logs ```outage_simulation.sh``` s
 
 ```-S``` - to replace configuration for logstash remote server under ```/system/logging/remote-server[host=$LOGSTASHIP]"``` with new one.
 
-```<WAITTIMER>``` - to adjust time interval between structive actions applied (10 sec by default).
+```<WAITTIMER>``` - to adjust time interval between desstructive actions applied (10 sec by default).
 
 Basic configuraion can found [here](./sys_log_logstash.json.tmpl), which reperesent default lab configuration, and can be adjusted per your needs and requirements.
 
