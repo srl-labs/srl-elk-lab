@@ -13,7 +13,7 @@ authors:
 
 ## Intro
 
-Syslog one of the most widely and powerfull instumentation used almost everywhere. SR Lunix is not an exclusion, while syslog client implementation uses powerful (rsyslog)[https://documentation.nokia.com/srlinux/22-6/html/product/OAM.html].
+Syslog one of the most widely and powerfull instumentation used almost everywhere. SR Lunix is not an exclusion, while syslog client implementation uses powerful [rsyslog][rsyslog].
 
 
 ## Lab summary
@@ -734,6 +734,7 @@ Finally, a bit of classic regexp, which trying to search of BGP keyword in the `
 [data-flow-diagram]: ../pic/data_flow.png
 
 
+[rsyslog]: https://documentation.nokia.com/srlinux/22-6/html/product/OAM.html
 [lab]: https://github.com/hellt/openbgpd-lab
 [containerlab]: https://containerlab.dev
 [clab-install]: https://containerlab.dev/install/#install-script
