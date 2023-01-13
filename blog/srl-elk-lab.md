@@ -105,30 +105,22 @@ Jan 11 18:40:31 srl-1-2 sr_linux_mgr: linux|1658|1658|00256|W: Memory utilizatio
 ```
 
 Log event message sent to remote destination has the following format: 
-
+```r
 <TIMESTAMP> <HOSTNAME> <APPLICATION>: <SUBSYSTEM>|<PID>|<THREAD_ID>|<SEQUENCE>|<??>: <MESSAGE>
-
+```
 where
-    
+```r
     <TIMESTAMP> := DATE-MONTH DATE-MDAY TIME-HOUR ":" TIME-MINUTE ":" TIME-SECOND; Traditional form - MMM DD HH:MM:SS.
-    
     <MESSAGE> := *OCTET; Application free-form message that provides information about the event, that could contain network-instance name, 
                 like ```Network-instance default```.
-    
     <HOSTNAME> := *OCTET; SR Linux hostname.
-    
     <APPLICATION> := *OCTET; SR Linux application name.
-    
     <SUBSYSTEM> := *OCTET; SR Linux subsystemname name, which is configured under ```/system/loggging/remote-server``` 
-    
     <PID> := *DIGIT; Process ID.
-    
     <THREAD_ID> := *DIGIT; Thread ID.
-    
     <SEQUENCE> := *DIGIT; Sequence number, which allows to reproduce order of the messages sent by SR Linux.
-    
     <??> := 1OCTET; What is it?
-
+```
 So far Logstash configuration takes this format as a beline for [pipeline filter configuration][logstash-pipeline], 
 ```r 
 filter {
