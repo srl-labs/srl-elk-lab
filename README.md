@@ -223,6 +223,27 @@ When pattern is not covering specific log message ```_grokparsefailure``` tag sh
         ],
 ```
 
+```_dateparsefailure``` tag appears in case datw plugin unable to parse specified field correctly, so date format should be revised and adjusted if necessary.
+During demo preparation I've encountered trivial issue and had to add line with ```"MMM  d HH:mm:ss", ```.
+
+```json
+        date {
+            match => [ "timestamp",
+            "MMM  d YYYY HH:mm:ss.SSS",
+            "MMM d YYYY HH:mm:ss.SSS",
+            "MMM dd YYYY HH:mm:ss.SSS",
+            "MMM  d HH:mm:ss.SSS",
+            "MMM dd HH:mm:ss",
+            "MMM  d HH:mm:ss", 
+            "YYYY MMM dd HH:mm:ss.SSS ZZZ",
+            "YYYY MMM dd HH:mm:ss ZZZ",
+            "YYYY MMM dd HH:mm:ss.SSS",
+            "ISO8601"
+            ]
+            timezone => "Europe/Rome"
+        }
+```
+
 ## Kibana
 
 For the fast and convinient start of demo dashboard and discover search configuraion [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of this lab.

@@ -76,7 +76,7 @@ So, let's start from the syslog configuration on SRL. Basic logging configuratio
           },
           "subsystem-name": "acl"
         },
-<...output omitted for brevity...>
+        <<===snip===>>
     }
 ```
 
@@ -147,6 +147,7 @@ filter {
             "MMM dd YYYY HH:mm:ss.SSS",
             "MMM  d HH:mm:ss.SSS",
             "MMM dd HH:mm:ss",
+            "MMM  d HH:mm:ss",
             "YYYY MMM dd HH:mm:ss.SSS ZZZ",
             "YYYY MMM dd HH:mm:ss ZZZ",
             "YYYY MMM dd HH:mm:ss.SSS",
@@ -154,7 +155,6 @@ filter {
             ]
             timezone => "Europe/Rome"
         }
-
     }
 }
 ```
@@ -218,7 +218,7 @@ So, let's demonstrate some of them to give feel and taste of available funstiona
 1673636289 18:58:09 es-docker-cluster green 3 3 60 30 0 0 0 0 - 100.0%
 ```
 
-A per conguration applid clueter indeces are created evey day.
+Logstash configuration implies creation of indeces every day.
 
 ```sh title="Cluster indeces"
 [azyablov@ecartman srl-elk-lab]$ curl -XGET "http://localhost:9200/_cat/indices?pretty"
