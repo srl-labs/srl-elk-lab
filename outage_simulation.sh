@@ -86,7 +86,7 @@ if [ ! -e ./.gnmic.yml ]; then
 fi
 # Flags
 for FLAG in "$@"; do
-    echo "|$FLAG|"
+    #echo "|$FLAG|"
     case $FLAG in
         "-S" )
             configure_syslog_for_all
