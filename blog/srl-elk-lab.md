@@ -213,7 +213,7 @@ In the next turn Elasticserach applies own [index template][index-template] mapp
 
 Playing with Kibana and creating dashboards is pretty obvious, but let's have a look how can we coninue working with data. 
 Not being Machine Learning expect, you can query and search data, apply aggregations for metrics, stats, create watchers and many other things.
-So, let's demonstrate some of them to give feel and taste of available funstionality.
+So, let's demonstrate some of them to give feel and taste of available functionality.
 
 
 ```sh title="Cluster health status"
