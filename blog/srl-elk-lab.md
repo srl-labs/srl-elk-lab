@@ -356,7 +356,7 @@ Sometimes you need to verify indece mappings are correct and done in accordance 
 }
 ```
 
-Let's imagine lag subsystem log messages are required.
+Let's imagine lag subsystem log messages are needed to check what's happening with access LAGs.
 
 ```sh
 [azyablov@ecartman srl-elk-lab]$ curl -XGET "http://es01:9200/fabric-logs-2023.01.13/_search?pretty" -H 'Content-Type: application/json' -d'
@@ -473,7 +473,7 @@ Let's imagine lag subsystem log messages are required.
 }
 ```
 
-As per index template mapping, ```severity_label``` is defined as a term, so all messages with ```Notice``` severity could be easily requeried.
+As per index template mapping, ```severity_label``` is defined as a term, so all messages with ```Notice``` severity could be easily queried.
 
 ```sh
 [azyablov@ecartman srl-elk-lab]$ curl -XGET "http://es01:9200/fabric-logs-2023.01.13/_search?pretty" -H 'Content-Type: application/json' -d'
