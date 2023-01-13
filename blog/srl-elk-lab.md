@@ -473,7 +473,7 @@ Let's imagine lag subsystem log messages are required.
 }
 ```
 
-As per index template mapping, severity_label is defined as a term, so all messages with ```Notice``` severity could be easily requeried.
+As per index template mapping, ```severity_label``` is defined as a term, so all messages with ```Notice``` severity could be easily requeried.
 
 ```sh
 [azyablov@ecartman srl-elk-lab]$ curl -XGET "http://es01:9200/fabric-logs-2023.01.13/_search?pretty" -H 'Content-Type: application/json' -d'
@@ -595,7 +595,7 @@ As per index template mapping, severity_label is defined as a term, so all messa
 }
 ```
 
-Finally, a bit of classic regexp, which trying to search of BGP keyword in the ```message``` field.
+Finally, a bit of classic regexp, which is searching for BGP keyword in the ```message``` field.
 
 ```sh title="Search API with DSL query"
 [azyablov@ecartman ~]$ curl -XGET "http://es01:9200/fabric-logs-2023.01.13/_search?pretty" -H 'Content-Type: application/json' -d'
