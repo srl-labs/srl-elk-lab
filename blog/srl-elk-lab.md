@@ -9,7 +9,7 @@ authors:
   - azyablov
 ---
 
-# SRL lab setup with ELK stack
+# SR Linux lab setup with ELK stack
 
 ## Intro
 
@@ -18,12 +18,12 @@ Syslog one of the most widely and powerfull instumentation used almost everywher
 
 ## Lab summary
 
-This blog posts is based on a lab example that builds a SRL fabric and ELK stack attacehd to OOB management.
+This blog posts is based on a lab example that builds a SR Linux fabric and ELK stack attacehd to OOB management.
 Fabric provides L2 domain and various connectivity types as well as underlaying configuration to enable log simulation for majority of the SR Linux subsystems.
 
 | Summary                   |                                                                           |
 |: ------------------------ | :-------------------------------------------------------------------------|
-| **Lab name**              | SRL lab setup with ELK stack                                              |
+| **Lab name**              | SR Linux lab setup with ELK stack                                              |
 | **Lab components**        | Nokia SR Linux 22.6.4, ELK stack 7.17.7                                   |
 | **Resource requirements** | :fontawesome-solid-microchip: 4 vCPU <br/>:fontawesome-solid-memory: 8 GB |
 | **Lab**                   | [azyablov/srl-elk-lab][lab-repo]                                          |
@@ -53,11 +53,11 @@ Since containerlab uses containers as the nodes of a lab, Docker engine has to b
 # Background of the syslog story
 
 What really complements [guidelines][lab-repo] coming with lab repository is data flow and data transformation.
-Log events flows from SRL to Logstash, where messages undergo a transformation and futher feeded into Elasticsearch.
+Log events flows from SR Linux to Logstash, where messages undergo a transformation and futher feeded into Elasticsearch.
 
 ![Data Flow Diagram][data-flow-diagram]
 
-So, let's start from the syslog configuration on SRL. Basic logging configuration consists of specifying a source, filter and destination for log messages, which are coming from syslog facilities and SRL subsystems. So, let's start from there.
+So, let's start from the syslog configuration on SR Linux. Basic logging configuration consists of specifying a source, filter and destination for log messages, which are coming from syslog facilities and SR Linux subsystems. So, let's start from there.
 
 ```json title="SR Linux syslog configuration"
     {
@@ -80,7 +80,7 @@ So, let's start from the syslog configuration on SRL. Basic logging configuratio
     }
 ```
 
-As it's easy to see, there are IP@ and port where syslog server is listening for messages from SRL clients, by default, transport is UDP (TCP and UDP are supported). Number fo subsystems specified with the same filter to match all messages above informational, which is motivated by the intention to have a much as possible message footprint from the simulated fabric. All other details aren't so much important for quick start, but can be found in (official documentation)[https://documentation.nokia.com/srlinux/22-6/SR_Linux_Book_Files/Configuration_Basics_Guide/configb-logging.html#ariaid-title1]. Worse to mention that all configuration is coming from config, since manual configuration could be supersided by SR Linux.
+As it's easy to see, there are IP@ and port where syslog server is listening for messages from SR Linux clients, by default, transport is UDP (TCP and UDP are supported). Number fo subsystems specified with the same filter to match all messages above informational, which is motivated by the intention to have a much as possible message footprint from the simulated fabric. All other details aren't so much important for the quick start, but can be found in [official documentation][srl-off-doc]. Worse to mention that all configuration is coming from config, since manual configuration could be supersided by SR Linux.
 
 
 Normaly after syslog server saving received event into file it appears like below:
@@ -110,12 +110,12 @@ where
     <TIMESTAMP> := DATE-MONTH DATE-MDAY TIME-HOUR ":" TIME-MINUTE ":" TIME-SECOND; Traditional form - MMM DD HH:MM:SS.
     <MESSAGE> := *OCTET; Application free-form message that provides information about the event, that could contain network-instance name, 
                 like ```Network-instance default```.
-    <HOSTNAME> := *OCTET; SRL hostname.
-    <APPLICATION> := *OCTET; SRL application name.
-    <SUBSYSTEM> := *OCTET; SRL subsystemname name, which is configured under ```/system/loggging/remote-server``` 
+    <HOSTNAME> := *OCTET; SR Linux hostname.
+    <APPLICATION> := *OCTET; SR Linux application name.
+    <SUBSYSTEM> := *OCTET; SR Linux subsystemname name, which is configured under ```/system/loggging/remote-server``` 
     <PID> := *DIGIT; Process ID.
     <THREAD_ID> := *DIGIT; Thread ID.
-    <SEQUENCE> := *DIGIT; Sequence number, which allows to reproduce order of the messages sent by SRL.
+    <SEQUENCE> := *DIGIT; Sequence number, which allows to reproduce order of the messages sent by SR Linux.
     <??> := 1OCTET; What is it?
 
 So far Logstash configuration takes this format as a beline for [pipeline filter configuration][logstash-pipeline], 
@@ -735,6 +735,7 @@ Finally, a bit of classic regexp, which trying to search of BGP keyword in the `
 
 
 [rsyslog]: https://documentation.nokia.com/srlinux/22-6/html/product/OAM.html
+[srl-off-doc]: https://documentation.nokia.com/srlinux/22-6/SR_Linux_Book_Files/Configuration_Basics_Guide/configb-logging.html#ariaid-title1
 [lab]: https://github.com/hellt/openbgpd-lab
 [containerlab]: https://containerlab.dev
 [clab-install]: https://containerlab.dev/install/#install-script
