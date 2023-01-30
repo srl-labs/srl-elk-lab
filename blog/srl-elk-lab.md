@@ -551,7 +551,7 @@ Sometimes you need to verify indece mappings are correct and done in accordance 
 }
 ```
 
-Let's imagine lag subsystem log messages are needed to check what's happening with access LAGs.
+Let's imagine lag subsystem log messages are required to check what's happening with access LAGs.
 
 ```sh
 [azyablov@ecartman srl-elk-lab]$ curl -XGET "http://es01:9200/fabric-logs-2023.01.13/_search?pretty" -H 'Content-Type: application/json' -d'
@@ -925,14 +925,14 @@ Finally, a bit of classic regexp, which is searching for BGP keyword in the ```m
 
 ## Kibana
 
-For the fast and convinient start of demo dashboard and discover search configuraion [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of this lab.
-It could be added in few clicks using Kibaba import under Stach Management.
+For the fast and convenient start of demo dashboard and discover search configuration [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of this lab.
+It could be added in few clicks using Kibana import under Stack Management.
 
 ![kibana import][kibaba_stask_mgmt]
 
 Then you can go to to Discovery and Dashboard under Analytics and see simple dashboard.
 
-![kibana discuvery][kibaba_dashboard]
+![kibana discovery][kibaba_dashboard]
 
 ![kibana dashboard][kibaba_dashboard_2]
 
@@ -941,17 +941,16 @@ Then you can go to to Discovery and Dashboard under Analytics and see simple das
 
 This section is coming to reduce hassle bringing ELK stack on K8s cluster, of course, assuming ELK used for lab purposes. 
 In case you would like to advance your setup and run ELK stack on top of k8s, please consider to to fine tune your resources and ELK stack by itself.
-Here you can find necessray intents:
+Here you can find necessary intents:
 1. Kibana: [Config Map](../k8s/kibana/kibana-configmap.yaml), [Deloyment](../k8s/kibana/kibana-deployment.yaml), [Service](../k8s/kibana/kibana-service.yaml)
 2. Elasticsearch: [PVC](../k8s/elasticsearch/es-log-dev-persistentvolumeclaim.yaml), [Deloyment](../k8s/elasticsearch/es-log-dev-deployment.yaml), [Service](../k8s/elasticsearch/es-log-dev-es-services.yaml), [LBL Service](../k8s/elasticsearch/es-log-dev-service.yaml)
 3. Logstash: [Deployment](../k8s/logstash/logstash-deployment.yaml), [Config Map](../k8s/logstash/logstash-configmap.yaml), [LBL Service](../k8s/logstash/logstash-service.yaml), [PVC](../k8s/logstash/logstash-pvc.yaml)
 
-Confugurations were tested on real K8s cluster with Calico CNI and MelalLB as load-balancer.
-
+Configurations were tested on real K8s cluster with Calico CNI and MelalLB as load-balancer.
 
 1.    srlproc can be used as well, but program name is coming as standard part syslog message.
 
-2.    Setting number of documents to return to avoid very chatty responce for the sake fo brevity, can be used to limit documents retrieved.
+2.    Setting number of documents to return to avoid very chatty response for the sake fo brevity, can be used to limit documents retrieved.
 
 [topology]: ../pic/toplogy.png "Lab topology"
 [index-struture]: ../pic/index_doc_structure.png "Indexed document"
