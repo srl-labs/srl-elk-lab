@@ -27,22 +27,35 @@ This setup is more than enougth to demonstrate the way to integrate farbic with 
 
 # Quick start 
 
-1. Deploy your lab
+In order to bring up your lab follow the next simple steps:
+
+1. Clone repo
+
+```sh
+git clone https://github.com/azyablov/srl-elk-lab.git
+cd srl-elk-lab
+```
+
+2. Deploy the lab
+
 ```sh
 cd <lab folder>
 sudo clab deploy -t srl-elk.clab.yml
 ```
-2. Create index template
+
+3. Create index template (to avoid automatic template creation by elastic)
+
 ```sh
 curl -X PUT "localhost:9200/_index_template/fabric?pretty" -H 'Content-Type: application/json' -d @elk/logstash/index-template.json 
 ```
-3. Import Kibana templates as decribed in [Kibana](#kibana) section. Kibana should available via [http://localhost:5601](http://localhost:5601)
 
-4. Delete index created initially since it does not follow mappings and could not be adjusted any longer.
+4. Import Kibana templates as decribed in [Kibana](#kibana) section. Kibana should available via [http://localhost:5601](http://localhost:5601)
+
+5. Delete index created initially since it does not follow mappings and could not be adjusted any longer.
 
 ![Kibana delete index][index_deletion]
 
-5. Run simulation to indest data into elasticsearch as decribed in [Simulation](#simulation)
+5. Run simulation to quickly indest data into elasticsearch as decribed in [Simulation](#simulation)
 
 
 # Simulation
@@ -88,163 +101,7 @@ To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simul
 
 ![Outage Simulation][outage_simulation]
 
-# ELK Stack
-## Index Template and Mappings
-
-By default, logstash will create the following or similar to following mappings for the fabric indeces.
-
-```json
-{
-  "mappings": {
-    "_doc": {
-      "properties": {
-        "@timestamp": {
-          "type": "date"
-        },
-        "facility": {
-          "type": "long"
-        },
-        "facility_label": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        },
-        "host": {
-          "properties": {
-            "ip": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
-                }
-              }
-            },
-<...output omitted for brevity...>
-        "severity_label": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          },
-<...output omitted for brevity...>
-        "srlproc": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        },
-        "srlsequence": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        },
-        "srlthread": {
-          "type": "text",
-          "fields": {
-            "keyword": {
-              "type": "keyword",
-              "ignore_above": 256
-            }
-          }
-        },
-<...output omitted for brevity...>
-      }
-    }
-  }
-}
-```
-In order to have IP@ recognised and threated as IP as well as to have numric values considered as long, severity and facility as keywords only, assign appropriate types for the properties index teamplate should be created.
-As part of this excercise index template example example available as well.
-```sh
-curl -X PUT "localhost:9200/_index_template/fabric?pretty" -H 'Content-Type: application/json' -d @elk/logstash/index-template.json 
-{
-  "acknowledged" : true
-}
-```
-Of course, as soon as grok config is adjusted to remove/add new fields index teamplate must be udpated as well.
-In case you provide incorrect mappings that does not compatible with JSONs send by logstash, messages similar to provided below would appear in in logs, which could be easily viewed ```docker logs clab-srl-elk-lab-logstash```.
-
-```sh
-[2022-11-28T00:24:50,529][WARN ][logstash.outputs.elasticsearch][main][fabric-logs] Could not index event to Elasticsearch. {:status=>400, :action=>["index", {:_id=>nil, :_index=>"fabric-logs-2022.11.28", :routing=>nil}, {"srlthread"=>"1867", "facility_label"=>"local6", "srlnetinst"=>"default", "tags"=>["syslog", "srlinux"], "program"=>"sr_bfd_mgr", "facility"=>22, "srlsequence"=>"00167", "host.name"=>"srl-elk-1-1", "srlpid"=>"1867", "host.ip"=>"172.20.20.5", "severity"=>5, "timestamp"=>"Nov 28 01:24:50", "severity_label"=>"Notice", "priority"=>181, "@timestamp"=>2022-11-28T00:24:50.000Z, "srlproc"=>"bfd", "message"=>" - Session from 10.0.0.1:16416 to 10.0.0.6:16403 is UP"}], :response=>{"index"=>{"_index"=>"fabric-logs-2022.11.28", "_type"=>"_doc", "_id"=>"gqifu4QBS1bTYaEyTmJZ", "status"=>400, "error"=>{"type"=>"mapper_parsing_exception", "reason"=>"failed to parse field [timestamp] of type [date] in document with id 'gqifu4QBS1bTYaEyTmJZ'. Preview of field's value: 'Nov 28 01:24:50'", "caused_by"=>{"type"=>"illegal_argument_exception", "reason"=>"failed to parse date field [Nov 28 01:24:50] with format [strict_date_optional_time||epoch_millis]", "caused_by"=>{"type"=>"date_time_parse_exception", "reason"=>"Failed to parse with all enclosed parsers"}}}}}}
-```
-
-## Logstash configuration
-
-Logstash configuration inludes three artefacts:
-1. [Main configuration file](elk/logstash/logstash.yml)
-2. [Patterns used pipeline](elk/logstash/patterns)
-3. [Pipeline config](elk/logstash/pipeline/01-srl.main.conf) 
-
-90% of work is to craft configuration file is about grok plugin. Most important configuration to carve out necessary fields form the syslog messsages are provided below.
-Syntax is quite simple, so you can consult ELK [documentation for grok](https://www.elastic.co/guide/en/logstash/7.17/plugins-filters-grok.html), but in case it fits setup needs no adaptationg is required.
-
-```r
- grok {
-      patterns_dir => [ "/var/lib/logstash/patterns" ]
-      match => { "message" => "%{SRLPROC:srlproc}\|%{SRLPID:srlpid}\|%{SRLTHR:srlthread}\|%{SRLSEQ:srlsequence}(?<message>(.*))" }
-      overwrite => [ "message" ]
-      add_field => { "host.ip" => "%{host}" }
-      add_field => { "host.name" => "%{logsource}" }
-  }
-
-  grok {
-      patterns_dir => [ "/var/lib/logstash/patterns" ]
-      match => { "message" => [
-          "\|%{SRLDOT:garbage1}: %{SRLGRBG:garbage2}etwork-instance %{SRLNETINST:srlnetinst}(?<message>(.*))",
-          "\|%{SRLDOT:garbage1}: (?<message>(.*))"
-          ] }
-      overwrite => [ "message" ]
-      remove_field => [ "@version", "host", "logsource", "garbage1", "garbage2" ]
-  }
-```
-For sure, new SRL releases will be coming in the future and format could be adjusted in the way pipeline cofiguration will not be able to parse magges correctly.
-In this case log messages should appear under ```elk/logstash/logs``` by defatult to easier troubleshooting.
-When pattern is not covering specific log message ```_grokparsefailure``` tag should be observed in ```fail_to_parse_srl.log```.
-
-```json
-    "tags" => [
-            [0] "syslog",
-            [1] "srlinux",
-            [2] "_grokparsefailure"
-        ],
-```
-
-```_dateparsefailure``` tag appears in case datw plugin unable to parse specified field correctly, so date format should be revised and adjusted if necessary.
-During demo preparation I've encountered trivial issue and had to add line with ```"MMM  d HH:mm:ss", ```.
-
-```json
-        date {
-            match => [ "timestamp",
-            "MMM  d YYYY HH:mm:ss.SSS",
-            "MMM d YYYY HH:mm:ss.SSS",
-            "MMM dd YYYY HH:mm:ss.SSS",
-            "MMM  d HH:mm:ss.SSS",
-            "MMM dd HH:mm:ss",
-            "MMM  d HH:mm:ss", 
-            "YYYY MMM dd HH:mm:ss.SSS ZZZ",
-            "YYYY MMM dd HH:mm:ss ZZZ",
-            "YYYY MMM dd HH:mm:ss.SSS",
-            "ISO8601"
-            ]
-            timezone => "Europe/Rome"
-        }
-```
-
-## Kibana
+# Kibana
 
 For the fast and convinient start of demo dashboard and discover search configuraion [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of this lab.
 It could be added in few clicks using Kibaba import under Stach Management.
@@ -257,16 +114,6 @@ Then you can go to to Discovery and Dashboard under Analytics and see simple das
 
 ![kibana dashboard][kibaba_dashboard_2]
 
-## Howto ELK with K8s 
-
-This section is coming to reduce hassle bringing ELK stack on K8s cluster, of course, assuming ELK used for lab purposes. 
-In case you would like to advance your setup and run ELK stack on top of k8s, please consider to to fine tune your resources and ELK stack by itself.
-Here you can find necessray intents:
-1. Kibana: [Config Map](./k8s/kibana/kibana-configmap.yaml), [Deloyment](./k8s/kibana/kibana-deployment.yaml), [Service](./k8s/kibana/kibana-service.yaml)
-2. Elasticsearch: [PVC](./k8s/elasticsearch/es-log-dev-persistentvolumeclaim.yaml), [Deloyment](./k8s/elasticsearch/es-log-dev-deployment.yaml), [Service](./k8s/elasticsearch/es-log-dev-es-services.yaml), [LBL Service](./k8s/elasticsearch/es-log-dev-service.yaml)
-3. Logstash: [Deployment](./k8s/logstash/logstash-deployment.yaml), [Config Map](./k8s/logstash/logstash-configmap.yaml), [LBL Service](./k8s/logstash/logstash-service.yaml), [PVC](./k8s/logstash/logstash-pvc.yaml)
-
-Confugurations were tested on real K8s cluster with Calico CNI and MelalLB as load-balancer.
 
 [topology]: ./pic/toplogy.png "Lab topology"
 [kibaba_stask_mgmt]: ./pic/kibana_import.png "Stack Management"

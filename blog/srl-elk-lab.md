@@ -33,10 +33,15 @@ Fabric provides L2 domain and various connectivity types as well as underlaying 
 ## Lab repository
 
 [Lab repository][lab-repo] by itself provides all necessary artefasts and guidelines to ramp-up your own lab alongisde with the following guidelines:
+
 :material-check: Intro and lab topology
+
 :material-check: Quick start
+
 :material-check: Simulation capabilities
+
 :material-check: Detailed ELK stack configuration
+
 :material-check: How to bring up your own ELK stack on top of K8s, in case your aren't quite happy with docker or would like to make step further
 
 
@@ -50,9 +55,9 @@ bash -c "$(curl -sL https://get.containerlab.dev)"
 
 Since containerlab uses containers as the nodes of a lab, Docker engine has to be [installed][docker-install] on the host system.
 
-# Background of the syslog story
+# A background of the syslog story
 
-What really complements [guidelines][lab-repo] coming with lab repository is data flow and data transformation.
+What's sitting in the core of this story is data flow and data transformation.
 Log events flows from SR Linux to Logstash, where messages undergo a transformation and futher feeded into Elasticsearch.
 
 ![Data Flow Diagram][data-flow-diagram]
@@ -104,7 +109,8 @@ Jan 11 18:40:01 srl-1-2 sr_linux_mgr: linux|1658|1658|00255|W: Memory utilizatio
 Jan 11 18:40:31 srl-1-2 sr_linux_mgr: linux|1658|1658|00256|W: Memory utilization on ram module 1 is above 70%, current usage 83%
 ```
 
-Log event message sent to remote destination has the following format: 
+Log event message sent to remote destination has the following format:
+
 ```r
 <TIMESTAMP> <HOSTNAME> <APPLICATION>: <SUBSYSTEM>|<PID>|<THREAD_ID>|<SEQUENCE>|<??>: <MESSAGE>
 ```
@@ -121,7 +127,102 @@ where
     <SEQUENCE> := *DIGIT; Sequence number, which allows to reproduce order of the messages sent by SR Linux.
     <??> := 1OCTET; What is it?
 ```
-So far Logstash configuration takes this format as a beline for [pipeline filter configuration][logstash-pipeline], 
+
+Now it's time to deploy your own lab.
+
+# Quick start 
+
+In order to bring up your lab follow the next simple steps:
+
+1. Clone repo
+
+```sh
+git clone https://github.com/azyablov/srl-elk-lab.git
+cd srl-elk-lab
+```
+
+2. Deploy the lab
+
+```sh
+cd <lab folder>
+sudo clab deploy -t srl-elk.clab.yml
+```
+
+3. Create index template (to avoid automatic template creation by elastic)
+
+```sh
+curl -X PUT "localhost:9200/_index_template/fabric?pretty" -H 'Content-Type: application/json' -d @elk/logstash/index-template.json 
+```
+
+4. Import Kibana templates as decribed in [Kibana](#kibana) section. Kibana should available via [http://localhost:5601](http://localhost:5601)
+
+5. Delete index created initially since it does not follow mappings and could not be adjusted any longer.
+
+![Kibana delete index][index_deletion]
+
+5. Run simulation to quickly indest data into elasticsearch as decribed in [Simulation](#simulation)
+
+
+## Simulation
+
+In order to help quickly enrich ELK stack with logs ```outage_simulation.sh``` script could be executed with the following parameters:
+
+```-S``` - to replace configuration for logstash remote server under ```/system/logging/remote-server[host=$LOGSTASHIP]"``` with new one.
+
+```<WAITTIMER>``` - to adjust time interval between desstructive actions applied (10 sec by default).
+
+Basic configuraion can found [here](../sys_log_logstash.json.tmpl), which reperesent default lab configuration, and can be adjusted per your needs and requirements.
+
+```sh
+./outage_simulation.sh -S
+```
+
+By default configuration for remote server using UDP:
+
+```json
+    {
+      "host": "172.22.22.10",
+      "remote-port": 1514,
+      "subsystem": [
+        {
+          "priority": {
+            "match-above": "informational"
+          },
+          "subsystem-name": "aaa"
+        },
+        {
+          "priority": {
+            "match-above": "informational"
+          },
+          "subsystem-name": "acl"
+        },
+<...output omitted for brevity...>
+    }
+```
+In case TLS is a requirement, you can cosider to put rsyslog in front, simple docker image with self-signed and custom certificate can be found on [github.com/azyablov/rsyslogbase](https://github.com/azyablov/rsyslogbase)
+
+
+To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simulation.sh 15``` in case machine is a bit slow or you have another labs running on the same compute.
+
+![Outage Simulation][outage_simulation]
+
+
+# ELK Stack
+
+ELK stack configuration is covered in order or data flow appearace, so let's start with logstash first.
+
+## Logstash
+
+Logstash configuration inludes three artefacts:
+1. [Main configuration file](elk/logstash/logstash.yml)
+2. [Patterns used pipeline](elk/logstash/patterns)
+3. [Pipeline config](elk/logstash/pipeline/01-srl.main.conf) 
+
+
+So far Logstash configuration takes this format as a baseline for [pipeline filter configuration][logstash-pipeline].
+90% of work is to craft configuration file is about grok plugin. Most important configuration to carve out necessary fields form the syslog messsages are provided below.
+Syntax is quite simple, so you can consult ELK [documentation for grok](https://www.elastic.co/guide/en/logstash/7.17/plugins-filters-grok.html), but in case it fits setup needs no adaptationg is required.
+
 ```r 
 filter {
     if "srlinux" in [tags] {
@@ -207,11 +308,105 @@ Final outgoing JSON document from provided pipeline configuration follows the ne
     "priority": 181
 }
 ```
+
+It could happen that new SR Lunix releases could bring a new format due to soem reasons, so pipeline cofiguration would require adjustments to parse magges correctly.
+In this case log messages should appear under ```elk/logstash/logs/fail_to_parse_srl.log``` by defatult to easier troubleshooting.
+Logstash solving it elegant way by adding  ```_grokparsefailure``` tag, if pattern is not covering specific log messages by grok config.
+
+```json
+    "tags" => [
+            [0] "syslog",
+            [1] "srlinux",
+            [2] "_grokparsefailure"
+        ],
+```
+
+In the next turn ```_dateparsefailure``` tag appears in case datw plugin unable to parse specified field correctly, so date format should be revised and adjusted if necessary.
+For example, suring demo preparation I've encountered trivial issue and had to add line with ```"MMM  d HH:mm:ss", ```.
+
+```json
+        date {
+            match => [ "timestamp",
+            "MMM  d YYYY HH:mm:ss.SSS",
+            "MMM d YYYY HH:mm:ss.SSS",
+            "MMM dd YYYY HH:mm:ss.SSS",
+            "MMM  d HH:mm:ss.SSS",
+            "MMM dd HH:mm:ss",
+            "MMM  d HH:mm:ss", 
+            "YYYY MMM dd HH:mm:ss.SSS ZZZ",
+            "YYYY MMM dd HH:mm:ss ZZZ",
+            "YYYY MMM dd HH:mm:ss.SSS",
+            "ISO8601"
+            ]
+            timezone => "Europe/Rome"
+        }
+```
+
+## Elasticsearch
+
+### Index Template and Mappings
+
+If necessary index templates aren't created at the very begging, lasticsrearch will create automatically the following or similar to following mappings for the fabric indeces.
+Of course, that's not desirable result in many cases and in many cases recognised by elasticsearch just as type ```text```.
+
+```json
+{
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "facility": {
+          "type": "long"
+        },
+        "facility_label": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "ip": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+<...output omitted for brevity...>
+      }
+    }
+  }
+}
+```
+In order to have IP@ recognised and threated as IP as well as to have numric values considered as long, severity and facility as keywords only, assign appropriate types for the properties index teamplate should be created.
+As part of this excercise index template example example available as well.
+```sh
+curl -X PUT "localhost:9200/_index_template/fabric?pretty" -H 'Content-Type: application/json' -d @elk/logstash/index-template.json 
+{
+  "acknowledged" : true
+}
+```
+Worse to mention, that as soon as grok config is adjusted to remove/add new fields index teamplate must be udpated as well.
+In case you provide incorrect mappings that does not compatible with JSONs send by logstash, messages similar to provided below would appear in logs, which could be easily viewed ```docker logs clab-srl-elk-lab-logstash```.
+
+```sh
+[2022-11-28T00:24:50,529][WARN ][logstash.outputs.elasticsearch][main][fabric-logs] Could not index event to Elasticsearch. {:status=>400, :action=>["index", {:_id=>nil, :_index=>"fabric-logs-2022.11.28", :routing=>nil}, {"srlthread"=>"1867", "facility_label"=>"local6", "srlnetinst"=>"default", "tags"=>["syslog", "srlinux"], "program"=>"sr_bfd_mgr", "facility"=>22, "srlsequence"=>"00167", "host.name"=>"srl-elk-1-1", "srlpid"=>"1867", "host.ip"=>"172.20.20.5", "severity"=>5, "timestamp"=>"Nov 28 01:24:50", "severity_label"=>"Notice", "priority"=>181, "@timestamp"=>2022-11-28T00:24:50.000Z, "srlproc"=>"bfd", "message"=>" - Session from 10.0.0.1:16416 to 10.0.0.6:16403 is UP"}], :response=>{"index"=>{"_index"=>"fabric-logs-2022.11.28", "_type"=>"_doc", "_id"=>"gqifu4QBS1bTYaEyTmJZ", "status"=>400, "error"=>{"type"=>"mapper_parsing_exception", "reason"=>"failed to parse field [timestamp] of type [date] in document with id 'gqifu4QBS1bTYaEyTmJZ'. Preview of field's value: 'Nov 28 01:24:50'", "caused_by"=>{"type"=>"illegal_argument_exception", "reason"=>"failed to parse date field [Nov 28 01:24:50] with format [strict_date_optional_time||epoch_millis]", "caused_by"=>{"type"=>"date_time_parse_exception", "reason"=>"Failed to parse with all enclosed parsers"}}}}}}
+```
 In the next turn Elasticserach applies own [index template][index-template] mappings, which results in the structure below:
 
 ![Indexed document][index-struture]
 
-Playing with Kibana and creating dashboards is pretty obvious, but let's have a look how can we coninue working with data. 
+### Working with API
+
+Playing with Kibana and creating dashboards is relatively easyto [start](#kibana) , but let's have a look how can we coninue working with data via API. 
 Not being Machine Learning expect, you can query and search data, apply aggregations for metrics, stats, create watchers and many other things.
 So, let's demonstrate some of them to give feel and taste of available functionality.
 
@@ -728,6 +923,32 @@ Finally, a bit of classic regexp, which is searching for BGP keyword in the ```m
 ```
 
 
+## Kibana
+
+For the fast and convinient start of demo dashboard and discover search configuraion [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of this lab.
+It could be added in few clicks using Kibaba import under Stach Management.
+
+![kibana import][kibaba_stask_mgmt]
+
+Then you can go to to Discovery and Dashboard under Analytics and see simple dashboard.
+
+![kibana discuvery][kibaba_dashboard]
+
+![kibana dashboard][kibaba_dashboard_2]
+
+
+# Howto ELK with K8s 
+
+This section is coming to reduce hassle bringing ELK stack on K8s cluster, of course, assuming ELK used for lab purposes. 
+In case you would like to advance your setup and run ELK stack on top of k8s, please consider to to fine tune your resources and ELK stack by itself.
+Here you can find necessray intents:
+1. Kibana: [Config Map](../k8s/kibana/kibana-configmap.yaml), [Deloyment](../k8s/kibana/kibana-deployment.yaml), [Service](../k8s/kibana/kibana-service.yaml)
+2. Elasticsearch: [PVC](../k8s/elasticsearch/es-log-dev-persistentvolumeclaim.yaml), [Deloyment](../k8s/elasticsearch/es-log-dev-deployment.yaml), [Service](../k8s/elasticsearch/es-log-dev-es-services.yaml), [LBL Service](../k8s/elasticsearch/es-log-dev-service.yaml)
+3. Logstash: [Deployment](../k8s/logstash/logstash-deployment.yaml), [Config Map](../k8s/logstash/logstash-configmap.yaml), [LBL Service](../k8s/logstash/logstash-service.yaml), [PVC](../k8s/logstash/logstash-pvc.yaml)
+
+Confugurations were tested on real K8s cluster with Calico CNI and MelalLB as load-balancer.
+
+
 1.    srlproc can be used as well, but program name is coming as standard part syslog message.
 
 2.    Setting number of documents to return to avoid very chatty responce for the sake fo brevity, can be used to limit documents retrieved.
@@ -748,3 +969,9 @@ Finally, a bit of classic regexp, which is searching for BGP keyword in the ```m
 [lab-repo]: https://github.com/azyablov/srl-elk-lab
 [logstash-pipeline]: https://github.com/azyablov/srl-elk-lab/blob/main/elk/logstash/pipeline/01-srl.main.conf
 [index-template]: https://github.com/azyablov/srl-elk-lab/blob/main/elk/logstash/index-template.json
+
+[kibaba_stask_mgmt]: ../pic/kibana_import.png "Stack Management"
+[kibaba_dashboard]: ../pic/kibana_dashboard.png "Kibana dashboard #1"
+[kibaba_dashboard_2]: ../pic/kibana_dashboard_2.png "Kibana dashboard #2"
+[index_deletion]: ../pic/delete_index.png "Kibana delete index"
+[outage_simulation]: ../pic/outage_smulation.gif "Simulation"
