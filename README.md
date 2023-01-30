@@ -1,11 +1,11 @@
 # Intro
 
-In old ages reading log files was normal excercise for sysadmin guru with assistnace of old school and robust tools like grep/egrep, awk, sed...
-Today's infrastructure requirements go well beyond just looking for the root cause why your application is crashing, inforectly configured or ... just to realise that port occupied by another applciation.
+In old ages reading log files was normal exercise for sysadmin guru with assistance of old school and robust tools like grep/egrep, awk, sed...
+Today's infrastructure requirements go well beyond just looking for the root cause why your application is crashing, incorrectly configured or ... just to realize that port occupied by another application.
 For sure topics related to ML, close-loop automation, intrusion detection, security analysis and just keeping logs in structured form and programmatically accessible way are becoming a norm for system design and architecture.
 
 This lab provides you with SR Linux / ELK playground to collect, handle and manage logs from your network devices. 
-It comes with prefefined pipelines and configurations of ELK stack to let playing w/o hassle with SR Linux, as well as developing log management applications with ready to use infrastructure.
+It comes with predefined pipelines and configurations of ELK stack to let playing w/o hassle with SR Linux, as well as developing log management applications with ready to use infrastructure.
 
 # Lab Topology
 
@@ -23,7 +23,7 @@ cl11 connectivity is using one interface attached to leaf1 (srl-elk-1-1).
 cl12 is connected as A/S to leaf3 (srl-elk-1-3) and leaf4 (srl-elk-1-4) with standby link signalling using LACP.
 cl31 is attached via static LAG in A/A mode.
 spine1 (srl-elk-2-1) and spine2 (srl-elk-2-2) are acting as BGP RR.
-This setup is more than enougth to demonstrate the way to integrate farbic with ELK stack.
+This setup is more than enough to demonstrate the way to integrate fabric with ELK stack.
 
 # Quick start 
 
@@ -49,13 +49,13 @@ sudo clab deploy -t srl-elk.clab.yml
 curl -X PUT "localhost:9200/_index_template/fabric?pretty" -H 'Content-Type: application/json' -d @elk/logstash/index-template.json 
 ```
 
-4. Import Kibana templates as decribed in [Kibana](#kibana) section. Kibana should available via [http://localhost:5601](http://localhost:5601)
+4. Import Kibana templates as described in [Kibana](#kibana) section. Kibana should available via [http://localhost:5601](http://localhost:5601)
 
 5. Delete index created initially since it does not follow mappings and could not be adjusted any longer.
 
 ![Kibana delete index][index_deletion]
 
-5. Run simulation to quickly indest data into elasticsearch as decribed in [Simulation](#simulation)
+5. Run simulation to quickly ingest data into elasticsearch as described in [Simulation](#simulation)
 
 
 # Simulation
@@ -64,9 +64,9 @@ In order to help quickly enrich ELK stack with logs ```outage_simulation.sh``` s
 
 ```-S``` - to replace configuration for logstash remote server under ```/system/logging/remote-server[host=$LOGSTASHIP]"``` with new one.
 
-```<WAITTIMER>``` - to adjust time interval between desstructive actions applied (10 sec by default).
+```<WAITTIMER>``` - to adjust time interval between destructive actions applied (10 sec by default).
 
-Basic configuraion can found [here](./sys_log_logstash.json.tmpl), which reperesent default lab configuration, and can be adjusted per your needs and requirements.
+Basic configuration can found [here](./sys_log_logstash.json.tmpl), which represent default lab configuration, and can be adjusted per your needs and requirements.
 
 ```sh
 ./outage_simulation.sh -S
@@ -94,7 +94,7 @@ By default configuration for remote server using UDP:
 <...output omitted for brevity...>
     }
 ```
-In case TLS is a requirement, you can cosider to put rsyslog in front, simple docker image with self-signed and custom certificate can be found on [github.com/azyablov/rsyslogbase](https://github.com/azyablov/rsyslogbase)
+In case TLS is a requirement, you can consider to put rsyslog in front, simple docker image with self-signed and custom certificate can be found on [github.com/azyablov/rsyslogbase](https://github.com/azyablov/rsyslogbase)
 
 
 To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simulation.sh 15``` in case machine is a bit slow or you have another labs running on the same compute.
@@ -103,14 +103,14 @@ To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simul
 
 # Kibana
 
-For the fast and convinient start of demo dashboard and discover search configuraion [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of this lab.
-It could be added in few clicks using Kibaba import under Stach Management.
+For the fast and convenient start of demo dashboard and discover search configuration [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of this lab.
+It could be added in few clicks using Kibana import under Stack Management.
 
 ![kibana import][kibaba_stask_mgmt]
 
 Then you can go to to Discovery and Dashboard under Analytics and see simple dashboard.
 
-![kibana discuvery][kibaba_dashboard]
+![kibana discovery][kibaba_dashboard]
 
 ![kibana dashboard][kibaba_dashboard_2]
 

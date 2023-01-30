@@ -13,13 +13,13 @@ authors:
 
 ## Intro
 
-Syslog one of the most widely and powerfull instumentation used almost everywhere. SR Lunix is not an exclusion, while syslog client implementation uses powerful [rsyslog][rsyslog].
+Syslog one of the most widely and powerful instrumentation used almost everywhere. SR Linux is not an exclusion, while syslog client implementation uses powerful [rsyslog][rsyslog].
 
 
 ## Lab summary
 
-This blog posts is based on a lab example that builds a SR Linux fabric and ELK stack attacehd to OOB management.
-Fabric provides L2 domain and various connectivity types as well as underlaying configuration to enable log simulation for majority of the SR Linux subsystems.
+This blog posts is based on a lab example that builds a SR Linux fabric and ELK stack attached to OOB management.
+Fabric provides L2 domain and various connectivity types as well as underlying configuration to enable log simulation for majority of the SR Linux subsystems.
 
 | Summary                   |                                                                           |
 |: ------------------------ | :-------------------------------------------------------------------------|
@@ -32,7 +32,7 @@ Fabric provides L2 domain and various connectivity types as well as underlaying 
 
 ## Lab repository
 
-[Lab repository][lab-repo] by itself provides all necessary artefasts and guidelines to ramp-up your own lab alongisde with the following guidelines:
+[Lab repository][lab-repo] by itself provides all necessary artifacts and guidelines to ramp-up your own lab alongside with the following guidelines:
 
 :material-check: Intro and lab topology
 
@@ -47,7 +47,7 @@ Fabric provides L2 domain and various connectivity types as well as underlaying 
 
 ## Prerequisites
 
-The lab leverages the [Containerlab][containerlab] project to spin up a topology of network elements and couple it with containerized software such as openbgpd. A [one-click][clab-install] installation gets containerlab intstalled on any Linux system.
+The lab leverages the [Containerlab][containerlab] project to spin up a topology of network elements and couple it with containerized software such as openbgpd. A [one-click][clab-install] installation gets containerlab installed on any Linux system.
 
 ```bash title="Containerlab installation via installation-script"
 bash -c "$(curl -sL https://get.containerlab.dev)"
@@ -58,7 +58,7 @@ Since containerlab uses containers as the nodes of a lab, Docker engine has to b
 # A background of the syslog story
 
 What's sitting in the core of this story is data flow and data transformation.
-Log events flows from SR Linux to Logstash, where messages undergo a transformation and futher feeded into Elasticsearch.
+Log events flows from SR Linux to Logstash, where messages undergo a transformation and further feed into Elasticsearch.
 
 ![Data Flow Diagram][data-flow-diagram]
 
@@ -85,10 +85,10 @@ So, let's start from the syslog configuration on SR Linux. Basic logging configu
     }
 ```
 
-As it's easy to see, there are IP@ and port where syslog server is listening for messages from SR Linux clients, by default, transport is UDP (TCP and UDP are supported). Number fo subsystems specified with the same filter to match all messages above informational, which is motivated by the intention to have a much as possible message footprint from the simulated fabric. All other details aren't so much important for the quick start, but can be found in [official documentation][srl-off-doc]. Worse to mention that all configuration is coming from config, since manual configuration could be supersided by SR Linux.
+As it's easy to see, there are IP@ and port where syslog server is listening for messages from SR Linux clients, by default, transport is UDP (TCP and UDP are supported). Number fo subsystems specified with the same filter to match all messages above informational, which is motivated by the intention to have a much as possible message footprint from the simulated fabric. All other details aren't so much important for the quick start, but can be found in [official documentation][srl-off-doc]. Worse to mention that all configuration is coming from config, since manual configuration could be superseded by SR Linux.
 
 
-Normaly after syslog server saving received event into file it appears like below:
+Normally after syslog server saving received event into file it appears like below:
 
 ``` log
 an 11 18:39:00 srl-1-2 sr_bgp_mgr: bgp|1894|1965|00071|W: In network-instance default, the BGP session with VR default (1): Group ebgp-underlay: Peer 10.1.2.5 moved from higher state ACTIVE to lower state IDLE due to event TCP SOCKET ERROR
@@ -121,7 +121,7 @@ where
                 like ```Network-instance default```.
     <HOSTNAME> := *OCTET; SR Linux hostname.
     <APPLICATION> := *OCTET; SR Linux application name.
-    <SUBSYSTEM> := *OCTET; SR Linux subsystemname name, which is configured under ```/system/loggging/remote-server``` 
+    <SUBSYSTEM> := *OCTET; SR Linux subsystem name, which is configured under ```/system/logging/remote-server``` 
     <PID> := *DIGIT; Process ID.
     <THREAD_ID> := *DIGIT; Thread ID.
     <SEQUENCE> := *DIGIT; Sequence number, which allows to reproduce order of the messages sent by SR Linux.
@@ -154,13 +154,13 @@ sudo clab deploy -t srl-elk.clab.yml
 curl -X PUT "localhost:9200/_index_template/fabric?pretty" -H 'Content-Type: application/json' -d @elk/logstash/index-template.json 
 ```
 
-4. Import Kibana templates as decribed in [Kibana](#kibana) section. Kibana should available via [http://localhost:5601](http://localhost:5601)
+4. Import Kibana templates as described in [Kibana](#kibana) section. Kibana should available via [http://localhost:5601](http://localhost:5601)
 
 5. Delete index created initially since it does not follow mappings and could not be adjusted any longer.
 
 ![Kibana delete index][index_deletion]
 
-5. Run simulation to quickly indest data into elasticsearch as decribed in [Simulation](#simulation)
+5. Run simulation to quickly ingest data into elasticsearch as described in [Simulation](#simulation)
 
 
 ## Simulation
@@ -169,9 +169,9 @@ In order to help quickly enrich ELK stack with logs ```outage_simulation.sh``` s
 
 ```-S``` - to replace configuration for logstash remote server under ```/system/logging/remote-server[host=$LOGSTASHIP]"``` with new one.
 
-```<WAITTIMER>``` - to adjust time interval between desstructive actions applied (10 sec by default).
+```<WAITTIMER>``` - to adjust time interval between destructive actions applied (10 sec by default).
 
-Basic configuraion can found [here](../sys_log_logstash.json.tmpl), which reperesent default lab configuration, and can be adjusted per your needs and requirements.
+Basic configuration can found [here](../sys_log_logstash.json.tmpl), which represent default lab configuration, and can be adjusted per your needs and requirements.
 
 ```sh
 ./outage_simulation.sh -S
@@ -199,7 +199,7 @@ By default configuration for remote server using UDP:
 <...output omitted for brevity...>
     }
 ```
-In case TLS is a requirement, you can cosider to put rsyslog in front, simple docker image with self-signed and custom certificate can be found on [github.com/azyablov/rsyslogbase](https://github.com/azyablov/rsyslogbase)
+In case TLS is a requirement, you can consider to put rsyslog in front, simple docker image with self-signed and custom certificate can be found on [github.com/azyablov/rsyslogbase](https://github.com/azyablov/rsyslogbase)
 
 
 To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simulation.sh 15``` in case machine is a bit slow or you have another labs running on the same compute.
@@ -209,19 +209,19 @@ To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simul
 
 # ELK Stack
 
-ELK stack configuration is covered in order or data flow appearace, so let's start with logstash first.
+ELK stack configuration is covered in order or data flow appearance, so let's start with logstash first.
 
 ## Logstash
 
-Logstash configuration inludes three artefacts:
+Logstash configuration includes three artifacts:
 1. [Main configuration file](elk/logstash/logstash.yml)
 2. [Patterns used pipeline](elk/logstash/patterns)
 3. [Pipeline config](elk/logstash/pipeline/01-srl.main.conf) 
 
 
 So far Logstash configuration takes this format as a baseline for [pipeline filter configuration][logstash-pipeline].
-90% of work is to craft configuration file is about grok plugin. Most important configuration to carve out necessary fields form the syslog messsages are provided below.
-Syntax is quite simple, so you can consult ELK [documentation for grok](https://www.elastic.co/guide/en/logstash/7.17/plugins-filters-grok.html), but in case it fits setup needs no adaptationg is required.
+90% of work is to craft configuration file is about grok plugin. Most important configuration to carve out necessary fields form the syslog messages are provided below.
+Syntax is quite simple, so you can consult ELK [documentation for grok](https://www.elastic.co/guide/en/logstash/7.17/plugins-filters-grok.html), but in case it fits setup needs no adaptation is required.
 
 ```r 
 filter {
@@ -309,8 +309,8 @@ Final outgoing JSON document from provided pipeline configuration follows the ne
 }
 ```
 
-It could happen that new SR Lunix releases could bring a new format due to soem reasons, so pipeline cofiguration would require adjustments to parse magges correctly.
-In this case log messages should appear under ```elk/logstash/logs/fail_to_parse_srl.log``` by defatult to easier troubleshooting.
+It could happen that new SR Linux releases could bring a new format due to some reasons, so pipeline configuration would require adjustments to parse messages correctly.
+In this case log messages should appear under ```elk/logstash/logs/fail_to_parse_srl.log``` by default to easier troubleshooting.
 Logstash solving it elegant way by adding  ```_grokparsefailure``` tag, if pattern is not covering specific log messages by grok config.
 
 ```json
@@ -321,8 +321,8 @@ Logstash solving it elegant way by adding  ```_grokparsefailure``` tag, if patte
         ],
 ```
 
-In the next turn ```_dateparsefailure``` tag appears in case datw plugin unable to parse specified field correctly, so date format should be revised and adjusted if necessary.
-For example, suring demo preparation I've encountered trivial issue and had to add line with ```"MMM  d HH:mm:ss", ```.
+In the next turn ```_dateparsefailure``` tag appears in case date plugin unable to parse specified field correctly, so date format should be revised and adjusted if necessary.
+For example, uring demo preparation I've encountered trivial issue and had to add line with ```"MMM  d HH:mm:ss", ```.
 
 ```json
         date {
@@ -346,8 +346,8 @@ For example, suring demo preparation I've encountered trivial issue and had to a
 
 ### Index Template and Mappings
 
-If necessary index templates aren't created at the very begging, lasticsrearch will create automatically the following or similar to following mappings for the fabric indeces.
-Of course, that's not desirable result in many cases and in many cases recognised by elasticsearch just as type ```text```.
+If necessary index templates aren't created at the very begging, elasticsearch will create automatically the following or similar to following mappings for the fabric indices.
+Of course, that's not desirable result in many cases and in many cases recognized by elasticsearch just as type ```text```.
 
 ```json
 {
@@ -386,27 +386,27 @@ Of course, that's not desirable result in many cases and in many cases recognise
   }
 }
 ```
-In order to have IP@ recognised and threated as IP as well as to have numric values considered as long, severity and facility as keywords only, assign appropriate types for the properties index teamplate should be created.
-As part of this excercise index template example example available as well.
+In order to have IP@ recognized and threated as IP as well as to have numeric values considered as long, severity and facility as keywords only, assign appropriate types for the properties index template should be created.
+As part of this exercise index template example example available as well.
 ```sh
 curl -X PUT "localhost:9200/_index_template/fabric?pretty" -H 'Content-Type: application/json' -d @elk/logstash/index-template.json 
 {
   "acknowledged" : true
 }
 ```
-Worse to mention, that as soon as grok config is adjusted to remove/add new fields index teamplate must be udpated as well.
+Worse to mention, that as soon as grok config is adjusted to remove/add new fields index template must be updated as well.
 In case you provide incorrect mappings that does not compatible with JSONs send by logstash, messages similar to provided below would appear in logs, which could be easily viewed ```docker logs clab-srl-elk-lab-logstash```.
 
 ```sh
 [2022-11-28T00:24:50,529][WARN ][logstash.outputs.elasticsearch][main][fabric-logs] Could not index event to Elasticsearch. {:status=>400, :action=>["index", {:_id=>nil, :_index=>"fabric-logs-2022.11.28", :routing=>nil}, {"srlthread"=>"1867", "facility_label"=>"local6", "srlnetinst"=>"default", "tags"=>["syslog", "srlinux"], "program"=>"sr_bfd_mgr", "facility"=>22, "srlsequence"=>"00167", "host.name"=>"srl-elk-1-1", "srlpid"=>"1867", "host.ip"=>"172.20.20.5", "severity"=>5, "timestamp"=>"Nov 28 01:24:50", "severity_label"=>"Notice", "priority"=>181, "@timestamp"=>2022-11-28T00:24:50.000Z, "srlproc"=>"bfd", "message"=>" - Session from 10.0.0.1:16416 to 10.0.0.6:16403 is UP"}], :response=>{"index"=>{"_index"=>"fabric-logs-2022.11.28", "_type"=>"_doc", "_id"=>"gqifu4QBS1bTYaEyTmJZ", "status"=>400, "error"=>{"type"=>"mapper_parsing_exception", "reason"=>"failed to parse field [timestamp] of type [date] in document with id 'gqifu4QBS1bTYaEyTmJZ'. Preview of field's value: 'Nov 28 01:24:50'", "caused_by"=>{"type"=>"illegal_argument_exception", "reason"=>"failed to parse date field [Nov 28 01:24:50] with format [strict_date_optional_time||epoch_millis]", "caused_by"=>{"type"=>"date_time_parse_exception", "reason"=>"Failed to parse with all enclosed parsers"}}}}}}
 ```
-In the next turn Elasticserach applies own [index template][index-template] mappings, which results in the structure below:
+In the next turn Elasticsearch applies own [index template][index-template] mappings, which results in the structure below:
 
 ![Indexed document][index-struture]
 
 ### Working with API
 
-Playing with Kibana and creating dashboards is relatively easyto [start](#kibana) , but let's have a look how can we coninue working with data via API. 
+Playing with Kibana and creating dashboards is relatively easy to [start](#kibana) , but let's have a look how can we continue working with data via API. 
 Not being Machine Learning expect, you can query and search data, apply aggregations for metrics, stats, create watchers and many other things.
 So, let's demonstrate some of them to give feel and taste of available functionality.
 
@@ -416,9 +416,9 @@ So, let's demonstrate some of them to give feel and taste of available functiona
 1673636289 18:58:09 es-docker-cluster green 3 3 60 30 0 0 0 0 - 100.0%
 ```
 
-Logstash configuration implies creation of indeces every day.
+Logstash configuration implies creation of indices every day.
 
-```sh title="Cluster indeces"
+```sh title="Cluster indices"
 [azyablov@ecartman srl-elk-lab]$ curl -XGET "http://localhost:9200/_cat/indices?pretty"
 green open .kibana_task_manager_7.17.7_001 QkmljFNsRoSgECCImqVKKA 1 1    17 3864  29.9mb  15.1mb
 green open .apm-agent-configuration        TW376NnUSXuVZJoCWyMqmA 1 1     0    0    452b    226b
