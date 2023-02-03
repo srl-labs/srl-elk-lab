@@ -71,6 +71,8 @@ topology:
         - ./elk/logstash/logs/:/logs/
       wait-for:
         - es01
+        - es02
+        - es03
       startup-delay: 30
     kibana:
       kind: linux
@@ -82,6 +84,8 @@ topology:
         - 5601:5601/tcp
       wait-for:
         - es01
+        - es02
+        - es03
       startup-delay: 60
     es01:
       kind: linux
@@ -90,13 +94,44 @@ topology:
       env:
         node.name: es01
         cluster.name: es-docker-cluster
-        discovery.type: single-node
+        discovery.seed_hosts: es02,es03
+        cluster.initial_master_nodes: es01,es02,es03
         bootstrap.memory_lock: false
         ES_JAVA_OPTS: "-Xms512m -Xmx512m"
       binds:
-        - ./elk/elasticsearch_data01:/usr/share/elasticsearch/data
+        - /var/lib/docker/volumes/elasticsearch_data01/_data:/usr/share/elasticsearch/data
       ports:
         - 9200:9200/tcp
+    es02:
+      kind: linux
+      mgmt_ipv4: 172.22.22.12
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
+      env:
+        node.name: es02
+        cluster.name: es-docker-cluster
+        discovery.seed_hosts: es01,es03
+        cluster.initial_master_nodes: es01,es02,es03
+        bootstrap.memory_lock: false
+        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      binds:
+        - /var/lib/docker/volumes/elasticsearch_data02/_data:/usr/share/elasticsearch/data
+      ports:
+        - 9201:9200/tcp
+    es03:
+      kind: linux
+      mgmt_ipv4: 172.22.22.13
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
+      env:
+        node.name: es03
+        cluster.name: es-docker-cluster
+        discovery.seed_hosts: es01,es02
+        cluster.initial_master_nodes: es01,es02,es03
+        bootstrap.memory_lock: false
+        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      binds:
+        - /var/lib/docker/volumes/elasticsearch_data03/_data:/usr/share/elasticsearch/data
+      ports:
+        - 9202:9200/tcp
     cl11:
       kind: "linux"
       mgmt_ipv4: 172.22.22.31
