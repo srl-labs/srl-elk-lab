@@ -1,8 +1,10 @@
 name: elk
 prefix: ""
+
 mgmt:
   network: srl_elk_lab
   ipv4_subnet: 172.22.22.0/24
+
 topology:
   kinds:
     srl:
@@ -12,6 +14,7 @@ topology:
         - kibana
     linux:
       image: ghcr.io/hellt/network-multitool
+
   nodes:
     #
     # DC FABRIC
@@ -59,6 +62,20 @@ topology:
     #
     # ELK STACK
     #
+    es01:
+      kind: linux
+      mgmt_ipv4: 172.22.22.11
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
+      env:
+        node.name: es01
+        cluster.name: es-docker-cluster
+        discovery.type: single-node
+        bootstrap.memory_lock: "false"
+        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      binds:
+        - ./elk/elasticsearch_data01:/usr/share/elasticsearch/data
+      ports:
+        - 9200:9200/tcp
     logstash:
       kind: linux
       mgmt_ipv4: 172.22.22.10
@@ -82,20 +99,6 @@ topology:
       wait-for:
         - es01
       startup-delay: 60
-    es01:
-      kind: linux
-      mgmt_ipv4: 172.22.22.11
-      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
-      env:
-        node.name: es01
-        cluster.name: es-docker-cluster
-        discovery.type: single-node
-        bootstrap.memory_lock: "false"
-        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-      binds:
-        - ./elk/elasticsearch_data01:/usr/share/elasticsearch/data
-      ports:
-        - 9200:9200/tcp
     #
     # CLIENTS
     #
