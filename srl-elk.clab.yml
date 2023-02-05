@@ -64,7 +64,7 @@ topology:
     #
     es01:
       kind: linux
-      mgmt_ipv4: 172.22.22.11
+      mgmt_ipv4: 172.22.22.10
       image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
       env:
         node.name: es01
@@ -78,7 +78,7 @@ topology:
         - 9200:9200/tcp
     logstash:
       kind: linux
-      mgmt_ipv4: 172.22.22.10
+      mgmt_ipv4: 172.22.22.11
       image: docker.elastic.co/logstash/logstash:7.17.7
       binds:
         - ./elk/logstash/pipeline/:/usr/share/logstash/pipeline/
@@ -90,7 +90,7 @@ topology:
       startup-delay: 30
     kibana:
       kind: linux
-      mgmt_ipv4: 172.22.22.20
+      mgmt_ipv4: 172.22.22.12
       image: docker.elastic.co/kibana/kibana:7.17.7
       binds:
         - ./elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
