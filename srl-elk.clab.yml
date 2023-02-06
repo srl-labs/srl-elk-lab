@@ -49,16 +49,6 @@ topology:
       mgmt_ipv4: 172.22.22.26
       group: tier-2
       startup-config: fabric/srl-2-2.cfg
-    srl-3-1:
-      kind: srl
-      mgmt_ipv4: 172.22.22.27
-      group: tier-3
-      startup-config: fabric/srl-3-1.cfg
-    srl-3-2:
-      kind: srl
-      mgmt_ipv4: 172.22.22.28
-      group: tier-3
-      startup-config: fabric/srl-3-2.cfg
     #
     # ELK STACK
     #
@@ -71,6 +61,7 @@ topology:
         discovery.type: single-node
         ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       binds:
+        # Uncomment line below in case persistency needed across lab deployments / destroys
         # - ./elk/elasticsearch_data01:/usr/share/elasticsearch/data
         - elk/logstash/index-template.json:/tmp/index-template.json
       ports:
@@ -119,22 +110,6 @@ topology:
         - ip link set eth2 master bond0
         - ip link set bond0 up
         - ip addr add 172.16.3.2/24 dev bond0
-    cl31:
-      kind: linux
-      mgmt_ipv4: 172.22.22.33
-      exec:
-        - ip link add br0 type bridge
-        - ip link add bond0 type bond
-        - ip link set bond0 type bond miimon 100 mode balance-xor
-        - ip link set eth1 down
-        - ip link set eth2 down
-        - ip link set eth1 master bond0
-        - ip link set eth2 master bond0
-        - ip link set bond0 up
-        - ip link set bond0 master br0
-        - ip addr add 172.16.3.3/24 dev br0
-        - ip link set br0 up
-
   #
   # LINKS
   #
@@ -164,18 +139,6 @@ topology:
         - srl-1-4:e1-2
         - srl-2-2:e1-4
     - endpoints:
-        - srl-2-1:e1-5
-        - srl-3-1:e1-1
-    - endpoints:
-        - srl-2-1:e1-6
-        - srl-3-2:e1-1
-    - endpoints:
-        - srl-2-2:e1-5
-        - srl-3-1:e1-2
-    - endpoints:
-        - srl-2-2:e1-6
-        - srl-3-2:e1-2
-    - endpoints:
         - cl11:eth1
         - srl-1-1:e1-10
     - endpoints:
@@ -184,9 +147,3 @@ topology:
     - endpoints:
         - cl12:eth2
         - srl-1-4:e1-10
-    - endpoints:
-        - cl31:eth1
-        - srl-3-1:e1-10
-    - endpoints:
-        - cl31:eth2
-        - srl-3-2:e1-10

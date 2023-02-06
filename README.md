@@ -10,19 +10,17 @@ It comes with predefined pipelines and configurations of ELK stack to let playin
 # Lab Topology
 
 This lab was created to allow easily enter this domain with your SR Linux based fabric.
-clab topology represents 3-tier fabric topology and with 3 containers  sitting within one L2 domain.
+clab topology represents 2-tier fabric topology and with 2 containers sitting within one L2 domain.
 
 ![ELK lab topology][topology]
 
 
 Naming conventions are very simple:
-* srl-elk-1-* - leafs,
-* srl-elk-2-* - spines,
-* srl-elk-3-* - border leafs.
-cl11 connectivity is using one interface attached to leaf1 (srl-elk-1-1).
-cl12 is connected as A/S to leaf3 (srl-elk-1-3) and leaf4 (srl-elk-1-4) with standby link signalling using LACP.
-cl31 is attached via static LAG in A/A mode.
-spine1 (srl-elk-2-1) and spine2 (srl-elk-2-2) are acting as BGP RR.
+* srl-1-* - leafs,
+* srl-2-* - spines.
+cl11 connectivity is using one interface attached to leaf1 (srl-1-1).
+cl12 is connected as A/S to leaf3 (srl-1-3) and leaf4 (srl-1-4) with standby link signalling using LACP.
+spine1 (srl-2-1) and spine2 (srl-2-2) are acting as BGP RR.
 This setup is more than enough to demonstrate the way to integrate fabric with ELK stack.
 
 # Quick start 
@@ -76,7 +74,7 @@ By default configuration for remote server using UDP:
 
 ```json
     {
-      "host": "172.22.22.10",
+      "host": "172.22.22.11",
       "remote-port": 1514,
       "subsystem": [
         {
@@ -115,7 +113,7 @@ Then you can go to to Discovery and Dashboard under Analytics and see simple das
 ![kibana dashboard][kibaba_dashboard_2]
 
 
-[topology]: ./pic/toplogy.png "Lab topology"
+[topology]: ./pic/topology.png "Lab topology"
 [kibaba_stask_mgmt]: ./pic/kibana_import.png "Stack Management"
 [kibaba_dashboard]: ./pic/kibana_dashboard.png "Kibana dashboard #1"
 [kibaba_dashboard_2]: ./pic/kibana_dashboard_2.png "Kibana dashboard #2"

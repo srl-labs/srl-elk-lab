@@ -1,68 +1,109 @@
 name: elk
-prefix: null
+prefix: ""
+
 mgmt:
   network: srl_elk_lab
   ipv4_subnet: 172.22.22.0/24
+
 topology:
   kinds:
     srl:
       image: ghcr.io/nokia/srlinux:22.6.4
+      type: ixrd3
       wait-for:
         - kibana
     linux:
       image: ghcr.io/hellt/network-multitool
+
   nodes:
+    #
+    # DC FABRIC
+    #
     srl-1-1:
       mgmt_ipv4: 172.22.22.21
       kind: srl
       group: tier-1
-      type: ixrd3
       startup-config: fabric/srl-1-1.cfg
     srl-1-2:
       kind: srl
       mgmt_ipv4: 172.22.22.22
       group: tier-1
-      type: ixrd3
       startup-config: fabric/srl-1-2.cfg
     srl-1-3:
       kind: srl
       mgmt_ipv4: 172.22.22.23
       group: tier-1
-      type: ixrd3
       startup-config: fabric/srl-1-3.cfg
     srl-1-4:
       kind: srl
       mgmt_ipv4: 172.22.22.24
       group: tier-1
-      type: ixrd3
       startup-config: fabric/srl-1-4.cfg
     srl-2-1:
       kind: srl
       mgmt_ipv4: 172.22.22.25
       group: tier-2
-      type: ixrd3
       startup-config: fabric/srl-2-1.cfg
     srl-2-2:
       kind: srl
       mgmt_ipv4: 172.22.22.26
       group: tier-2
-      type: ixrd3
       startup-config: fabric/srl-2-2.cfg
-    srl-3-1:
-      kind: srl
-      mgmt_ipv4: 172.22.22.27
-      group: tier-3
-      type: ixrd3
-      startup-config: fabric/srl-3-1.cfg
-    srl-3-2:
-      kind: srl
-      mgmt_ipv4: 172.22.22.28
-      group: tier-3
-      type: ixrd3
-      startup-config: fabric/srl-3-2.cfg
-    logstash:
+    #
+    # ELK STACK
+    #
+    es01:
       kind: linux
       mgmt_ipv4: 172.22.22.10
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
+      env:
+        node.name: es01
+        cluster.name: es-docker-cluster
+        discovery.seed_hosts: es02,es03
+        cluster.initial_master_nodes: es01,es02,es03
+        bootstrap.memory_lock: false
+        ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      binds:
+        # Uncomment line below in case persistency needed across lab deployments / destroys
+        # - ./elk/elasticsearch_data01:/usr/share/elasticsearch/data
+        - elk/logstash/index-template.json:/tmp/index-template.json
+      ports:
+        - 9200:9200/tcp
+    es02:
+      kind: linux
+      mgmt_ipv4: 172.22.22.13
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
+      env:
+        node.name: es02
+        cluster.name: es-docker-cluster
+        discovery.seed_hosts: es01,es03
+        cluster.initial_master_nodes: es01,es02,es03
+        bootstrap.memory_lock: false
+        ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      binds:
+        # Uncomment line below in case persistency needed across lab deployments / destroys
+        # - ./elk/elasticsearch_data02:/usr/share/elasticsearch/data
+      ports:
+        - 9201:9200/tcp
+    es03:
+      kind: linux
+      mgmt_ipv4: 172.22.22.14
+      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
+      env:
+        node.name: es03
+        cluster.name: es-docker-cluster
+        discovery.seed_hosts: es01,es02
+        cluster.initial_master_nodes: es01,es02,es03
+        bootstrap.memory_lock: false
+        ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      binds:
+        # Uncomment line below in case persistency needed across lab deployments / destroys
+        # - ./elk/elasticsearch_data03:/usr/share/elasticsearch/data
+      ports:
+        - 9202:9200/tcp
+    logstash:
+      kind: linux
+      mgmt_ipv4: 172.22.22.11
       image: docker.elastic.co/logstash/logstash:7.17.7
       binds:
         - ./elk/logstash/pipeline/:/usr/share/logstash/pipeline/
@@ -71,12 +112,9 @@ topology:
         - ./elk/logstash/logs/:/logs/
       wait-for:
         - es01
-        - es02
-        - es03
-      startup-delay: 30
     kibana:
       kind: linux
-      mgmt_ipv4: 172.22.22.20
+      mgmt_ipv4: 172.22.22.12
       image: docker.elastic.co/kibana/kibana:7.17.7
       binds:
         - ./elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
@@ -84,67 +122,22 @@ topology:
         - 5601:5601/tcp
       wait-for:
         - es01
-        - es02
-        - es03
-      startup-delay: 60
-    es01:
-      kind: linux
-      mgmt_ipv4: 172.22.22.11
-      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
-      env:
-        node.name: es01
-        cluster.name: es-docker-cluster
-        discovery.seed_hosts: es02,es03
-        cluster.initial_master_nodes: es01,es02,es03
-        bootstrap.memory_lock: false
-        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-      binds:
-        - /var/lib/docker/volumes/elasticsearch_data01/_data:/usr/share/elasticsearch/data
-      ports:
-        - 9200:9200/tcp
-    es02:
-      kind: linux
-      mgmt_ipv4: 172.22.22.12
-      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
-      env:
-        node.name: es02
-        cluster.name: es-docker-cluster
-        discovery.seed_hosts: es01,es03
-        cluster.initial_master_nodes: es01,es02,es03
-        bootstrap.memory_lock: false
-        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-      binds:
-        - /var/lib/docker/volumes/elasticsearch_data02/_data:/usr/share/elasticsearch/data
-      ports:
-        - 9201:9200/tcp
-    es03:
-      kind: linux
-      mgmt_ipv4: 172.22.22.13
-      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
-      env:
-        node.name: es03
-        cluster.name: es-docker-cluster
-        discovery.seed_hosts: es01,es02
-        cluster.initial_master_nodes: es01,es02,es03
-        bootstrap.memory_lock: false
-        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-      binds:
-        - /var/lib/docker/volumes/elasticsearch_data03/_data:/usr/share/elasticsearch/data
-      ports:
-        - 9202:9200/tcp
+    #
+    # CLIENTS
+    #
     cl11:
-      kind: "linux"
+      kind: linux
       mgmt_ipv4: 172.22.22.31
       exec:
         - ip link set eth1 down
         - ip addr add 172.16.3.1/24 dev eth1
         - ip link set eth1 up
     cl12:
-      kind: "linux"
+      kind: linux
       mgmt_ipv4: 172.22.22.32
       exec:
-        - ip link add bond0 type bond 
-        - ip link set bond0 type bond miimon 100 mode 802.3ad 
+        - ip link add bond0 type bond
+        - ip link set bond0 type bond miimon 100 mode 802.3ad
         - ip link set bond0 type bond lacp_rate fast
         - ip link set eth1 down
         - ip link set eth2 down
@@ -152,72 +145,40 @@ topology:
         - ip link set eth2 master bond0
         - ip link set bond0 up
         - ip addr add 172.16.3.2/24 dev bond0
-    cl31:
-      kind: "linux"
-      mgmt_ipv4: 172.22.22.33
-      exec:
-        - ip link add br0 type bridge
-        - ip link add bond0 type bond 
-        - ip link set bond0 type bond miimon 100 mode balance-xor
-        - ip link set eth1 down
-        - ip link set eth2 down
-        - ip link set eth1 master bond0
-        - ip link set eth2 master bond0
-        - ip link set bond0 up
-        - ip link set bond0 master br0
-        - ip addr add 172.16.3.3/24 dev br0
-        - ip link set br0 up
+  #
+  # LINKS
+  #
   links:
     - endpoints:
-      - srl-1-1:e1-1
-      - srl-2-1:e1-1
+        - srl-1-1:e1-1
+        - srl-2-1:e1-1
     - endpoints:
-      - srl-1-1:e1-2
-      - srl-2-2:e1-1
+        - srl-1-1:e1-2
+        - srl-2-2:e1-1
     - endpoints:
-      - srl-1-2:e1-1
-      - srl-2-1:e1-2
+        - srl-1-2:e1-1
+        - srl-2-1:e1-2
     - endpoints:
-      - srl-1-2:e1-2
-      - srl-2-2:e1-2
+        - srl-1-2:e1-2
+        - srl-2-2:e1-2
     - endpoints:
-      - srl-1-3:e1-1
-      - srl-2-1:e1-3
+        - srl-1-3:e1-1
+        - srl-2-1:e1-3
     - endpoints:
-      - srl-1-3:e1-2
-      - srl-2-2:e1-3
+        - srl-1-3:e1-2
+        - srl-2-2:e1-3
     - endpoints:
-      - srl-1-4:e1-1
-      - srl-2-1:e1-4
+        - srl-1-4:e1-1
+        - srl-2-1:e1-4
     - endpoints:
-      - srl-1-4:e1-2
-      - srl-2-2:e1-4
+        - srl-1-4:e1-2
+        - srl-2-2:e1-4
     - endpoints:
-      - srl-2-1:e1-5
-      - srl-3-1:e1-1
+        - cl11:eth1
+        - srl-1-1:e1-10
     - endpoints:
-      - srl-2-1:e1-6
-      - srl-3-2:e1-1
+        - cl12:eth1
+        - srl-1-3:e1-10
     - endpoints:
-      - srl-2-2:e1-5
-      - srl-3-1:e1-2
-    - endpoints:
-      - srl-2-2:e1-6
-      - srl-3-2:e1-2
-    - endpoints:
-      - cl11:eth1
-      - srl-1-1:e1-10
-    - endpoints:
-      - cl12:eth1
-      - srl-1-3:e1-10
-    - endpoints:
-      - cl12:eth2
-      - srl-1-4:e1-10
-    - endpoints:
-      - cl31:eth1
-      - srl-3-1:e1-10
-    - endpoints:
-      - cl31:eth2
-      - srl-3-2:e1-10
-    
-  
+        - cl12:eth2
+        - srl-1-4:e1-10

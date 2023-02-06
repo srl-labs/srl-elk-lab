@@ -4,7 +4,6 @@ NETWORK=`grep -E '^[ ]*network' srl-elk.clab.yml | sed -e 's/.*network[^:\/\/]*:
 SEP="***"
 LEAFS="1"
 SPINES="2"
-BLS="3"
 
 # Function defenitions == start ==
 function get_value (){
@@ -42,8 +41,6 @@ function configure_syslog_for_all (){
     replace_config_all $LEAFS $SYSLOGPATH $SYSLOGCONFIG
     echo -e "$SEP Configuring $SYSLOGPATH for spines $SEP"
     replace_config_all $SPINES $SYSLOGPATH $SYSLOGCONFIG
-    echo -e "$SEP Configuring $SYSLOGPATH for border leafs $SEP"
-    replace_config_all $BLS $SYSLOGPATH $SYSLOGCONFIG
 }
 
 function update_config_all(){
