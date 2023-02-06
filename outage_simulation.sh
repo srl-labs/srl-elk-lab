@@ -8,12 +8,12 @@ BLS="3"
 
 # Function defenitions == start ==
 function get_value (){
-    gnmic -d -a  clab-elk-srl-$1-$2 get --path $3 --values-only
+    gnmic -d -a  srl-$1-$2 get --path $3 --values-only
 }
 
 function set_value (){
-    echo -e "\t$SEP Setting value for clab-elk-srl-$1-$2 $SEP"
-    RETVAL=`gnmic -d -a  clab-elk-srl-$1-$2 set --update-path $3  --update-value $4`
+    echo -e "\t$SEP Setting value for srl-$1-$2 $SEP"
+    RETVAL=`gnmic -d -a  srl-$1-$2 set --update-path $3  --update-value $4`
     echo $RETVAL | grep -e '"operation": "UPDATE"' > /dev/null #2>&1 
     if [ $? == 0 ]; then
         echo -e "\t\tDONE"
@@ -34,7 +34,7 @@ function set_value_all (){
 
 function configure_syslog_for_all (){
     local IPINSPPATH="{{.NetworkSettings.Networks.$NETWORK.IPAMConfig.IPv4Address}}"
-    local LOGSTASHIP=`docker container inspect clab-srl-elk-lab-logstash -f $IPINSPPATH`
+    local LOGSTASHIP=`docker container inspect logstash -f $IPINSPPATH`
     local SYSLOGPATH="/system/logging/remote-server[host=$LOGSTASHIP]"
     local SYSLOGCONFIG="sys_log_logstash.json"
     sed -e "s/LOGSTASHIP/$LOGSTASHIP/g" sys_log_logstash.json.tmpl > $SYSLOGCONFIG
@@ -52,7 +52,7 @@ function update_config_all(){
         LAST=4
     fi
     for i in `seq 1 $LAST`; do 
-        local RETVAL=`gnmic -d -a  clab-elk-srl-$1-$i set --update-path $2 --update-file $3`
+        local RETVAL=`gnmic -d -a  srl-$1-$i set --update-path $2 --update-file $3`
         echo $RETVAL | grep -e '"operation": "UPDATE"' > /dev/null 2>&1 
         if [ $? == 0 ]; then
             echo -e "\tDONE"
@@ -68,7 +68,7 @@ function replace_config_all(){
         LAST=4
     fi
     for i in `seq 1 $LAST`; do 
-        local RETVAL=`gnmic -d -a  clab-elk-srl-$1-$i set --replace-path $2 --replace-file $3`
+        local RETVAL=`gnmic -d -a  srl-$1-$i set --replace-path $2 --replace-file $3`
         echo $RETVAL | grep -e '"operation": "REPLACE"' > /dev/null 2>&1 
         if [ $? == 0 ]; then
             echo -e "\tDONE"
@@ -99,17 +99,17 @@ for FLAG in "$@"; do
     esac
 done
 
-echo -e "$SEP Shutdown ibgp group on spine1 clab-elk-srl-2-1 $SEP"
+echo -e "$SEP Shutdown ibgp group on spine1 srl-2-1 $SEP"
 set_value $SPINES 1 /network-instance[name="default"]/protocols/bgp/group[group-name=ibgp-evpn]/admin-state disable
 
 echo -e "$SEP Wait $WTIME sec... $SEP"
 sleep $WTIME
-echo -e "$SEP Shutdown ibgp group on spine2 clab-elk-srl-2-2 $SEP"
+echo -e "$SEP Shutdown ibgp group on spine2 srl-2-2 $SEP"
 set_value $SPINES 2 /network-instance[name="default"]/protocols/bgp/group[group-name=ibgp-evpn]/admin-state disable
 
 echo -e "$SEP Wait $WTIME sec... $SEP"
 sleep $WTIME
-echo -e "$SEP Bring up ibgp group on spine1 and spine2 clab-elk-srl-2-1/2 $SEP"
+echo -e "$SEP Bring up ibgp group on spine1 and spine2 srl-2-1/2 $SEP"
 set_value_all $SPINES /network-instance[name="default"]/protocols/bgp/group[group-name=ibgp-evpn]/admin-state enable
 
 echo -e "$SEP Wait $WTIME sec... $SEP"
@@ -132,7 +132,7 @@ set_value $LEAFS 3 /interface[name=lag1]/admin-state enable
 set_value $LEAFS 4 /interface[name=lag1]/admin-state enable
 
 echo -e "$SEP Round-robin shut/noshut spine ports for"
-echo -e "\tspine1 clab-elk-srl-2-1"
+echo -e "\tspine1 srl-2-1"
 for i in `seq 1 6` ; do
     set_value $SPINES 1 /interface[name="ethernet-1/$i"]/admin-state disable
     sleep 2
@@ -143,7 +143,7 @@ for i in `seq 1 6` ; do
     sleep 2
 done 
 sleep 5
-echo -e "\tand spine2 clab-elk-srl-2-2 $SEP"
+echo -e "\tand spine2 srl-2-2 $SEP"
 for i in `seq 1 6` ; do
     set_value $SPINES 2 /interface[name="ethernet-1/$i"]/admin-state disable
     sleep 2
