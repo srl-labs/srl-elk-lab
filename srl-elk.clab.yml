@@ -68,12 +68,11 @@ topology:
       image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
       env:
         node.name: es01
-        cluster.name: es-docker-cluster
         discovery.type: single-node
-        bootstrap.memory_lock: "false"
-        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       binds:
-        - ./elk/elasticsearch_data01:/usr/share/elasticsearch/data
+        # - ./elk/elasticsearch_data01:/usr/share/elasticsearch/data
+        - elk/logstash/index-template.json:/tmp/index-template.json
       ports:
         - 9200:9200/tcp
     logstash:
@@ -87,7 +86,6 @@ topology:
         - ./elk/logstash/logs/:/logs/
       wait-for:
         - es01
-      startup-delay: 30
     kibana:
       kind: linux
       mgmt_ipv4: 172.22.22.12
@@ -98,7 +96,6 @@ topology:
         - 5601:5601/tcp
       wait-for:
         - es01
-      startup-delay: 60
     #
     # CLIENTS
     #
