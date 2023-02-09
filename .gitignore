@@ -1,4 +1,5 @@
 elk/elasticsearch_data01/*
+elk/logstash/*
 blog.back
 clab-*
 .*y*ml.bak
