@@ -19,36 +19,36 @@ topology:
     #
     # DC FABRIC
     #
-    srl-1-1:
+    leaf1:
       mgmt_ipv4: 172.22.22.21
       kind: srl
       group: tier-1
-      startup-config: fabric/srl-1-1.cfg
-    srl-1-2:
+      startup-config: fabric/leaf1.cfg
+    leaf2:
       kind: srl
       mgmt_ipv4: 172.22.22.22
       group: tier-1
-      startup-config: fabric/srl-1-2.cfg
-    srl-1-3:
+      startup-config: fabric/leaf2.cfg
+    leaf3:
       kind: srl
       mgmt_ipv4: 172.22.22.23
       group: tier-1
-      startup-config: fabric/srl-1-3.cfg
-    srl-1-4:
+      startup-config: fabric/leaf3.cfg
+    leaf4:
       kind: srl
       mgmt_ipv4: 172.22.22.24
       group: tier-1
-      startup-config: fabric/srl-1-4.cfg
-    srl-2-1:
+      startup-config: fabric/leaf4.cfg
+    spine1:
       kind: srl
       mgmt_ipv4: 172.22.22.25
       group: tier-2
-      startup-config: fabric/srl-2-1.cfg
-    srl-2-2:
+      startup-config: fabric/spine1.cfg
+    spine2:
       kind: srl
       mgmt_ipv4: 172.22.22.26
       group: tier-2
-      startup-config: fabric/srl-2-2.cfg
+      startup-config: fabric/spine2.cfg
     #
     # ELK STACK
     #
@@ -116,35 +116,35 @@ topology:
   #
   links:
     - endpoints:
-        - srl-1-1:e1-1
-        - srl-2-1:e1-1
+        - leaf1:e1-1
+        - spine1:e1-1
     - endpoints:
-        - srl-1-1:e1-2
-        - srl-2-2:e1-1
+        - leaf1:e1-2
+        - spine2:e1-1
     - endpoints:
-        - srl-1-2:e1-1
-        - srl-2-1:e1-2
+        - leaf2:e1-1
+        - spine1:e1-2
     - endpoints:
-        - srl-1-2:e1-2
-        - srl-2-2:e1-2
+        - leaf2:e1-2
+        - spine2:e1-2
     - endpoints:
-        - srl-1-3:e1-1
-        - srl-2-1:e1-3
+        - leaf3:e1-1
+        - spine1:e1-3
     - endpoints:
-        - srl-1-3:e1-2
-        - srl-2-2:e1-3
+        - leaf3:e1-2
+        - spine2:e1-3
     - endpoints:
-        - srl-1-4:e1-1
-        - srl-2-1:e1-4
+        - leaf4:e1-1
+        - spine1:e1-4
     - endpoints:
-        - srl-1-4:e1-2
-        - srl-2-2:e1-4
+        - leaf4:e1-2
+        - spine2:e1-4
     - endpoints:
         - cl11:eth1
-        - srl-1-1:e1-10
+        - leaf1:e1-10
     - endpoints:
         - cl12:eth1
-        - srl-1-3:e1-10
+        - leaf3:e1-10
     - endpoints:
         - cl12:eth2
-        - srl-1-4:e1-10
+        - leaf4:e1-10
