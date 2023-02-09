@@ -1,107 +1,101 @@
 {
-  "index_patterns" : [
-    "fabric-logs-*"
-  ],
-  "priority" : 500,
-  "template" : {
-    "settings" : {
-      "index" : {
-        "number_of_shards" : "1"
-      }
-    },
-    "mappings" : {
-      "properties" : {
-        "severity" : {
-          "type" : "long"
-        },
-        "srlnetinst" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "ignore_above" : 256,
-              "type" : "keyword"
-            }
+  "template": "fabric-logs-*",
+  "version": 101,
+  "settings": {
+    "index.refresh_interval": "3s"
+  },
+  "mappings": {
+    "properties": {
+      "severity": {
+        "type": "long"
+      },
+      "srlnetinst": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
           }
-        },
-        "srlpid" : {
-          "type" : "long"
-        },
-        "program" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "ignore_above" : 256,
-              "type" : "keyword"
-            }
-          }
-        },
-        "message" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "ignore_above" : 256,
-              "type" : "keyword"
-            }
-          }
-        },
-        "priority" : {
-          "type" : "long"
-        },
-        "tags" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "ignore_above" : 256,
-              "type" : "keyword"
-            }
-          }
-        },
-        "srlsequence" : {
-          "type" : "long"
-        },
-        "srlthread" : {
-          "type" : "long"
-        },
-        "@timestamp" : {
-          "type" : "date"
-        },
-        "host" : {
-          "properties" : {
-            "ip" : {
-              "type" : "ip",
-              "fields" : {
-                "keyword" : {
-                  "ignore_above" : 256,
-                  "type" : "keyword"
-                }
-              }
-            },
-            "name" : {
-              "type" : "keyword"
-            }
-          }
-        },
-        "srlproc" : {
-          "type" : "text",
-          "fields" : {
-            "keyword" : {
-              "ignore_above" : 256,
-              "type" : "keyword"
-            }
-          }
-        },
-        "facility" : {
-          "type" : "long"
-        },
-        "severity_label" : {
-          "type" : "keyword"
-        },
-        "facility_label" : {
-          "type" : "keyword"
-        },
-        "timestamp" : {
-          "type" : "text"
         }
+      },
+      "srlpid": {
+        "type": "long"
+      },
+      "program": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "message": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "priority": {
+        "type": "long"
+      },
+      "tags": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "srlsequence": {
+        "type": "long"
+      },
+      "srlthread": {
+        "type": "long"
+      },
+      "@timestamp": {
+        "type": "date"
+      },
+      "host": {
+        "properties": {
+          "ip": {
+            "type": "ip",
+            "fields": {
+              "keyword": {
+                "ignore_above": 256,
+                "type": "keyword"
+              }
+            }
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      },
+      "srlproc": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
+            "type": "keyword"
+          }
+        }
+      },
+      "facility": {
+        "type": "long"
+      },
+      "severity_label": {
+        "type": "keyword"
+      },
+      "facility_label": {
+        "type": "keyword"
+      },
+      "timestamp": {
+        "type": "text"
       }
     }
   }

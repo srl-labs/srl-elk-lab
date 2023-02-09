@@ -75,6 +75,7 @@ topology:
         - ./elk/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
         - ./elk/logstash/patterns:/var/lib/logstash/patterns
         - ./elk/logstash/logs/fail_to_parse_srl.log:/srl/fail_to_parse_srl.log
+        - ./elk/logstash/index-template.json:/tmp/index-template.json
       wait-for:
         - es01
     kibana:
