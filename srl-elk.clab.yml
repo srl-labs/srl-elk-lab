@@ -34,11 +34,6 @@ topology:
       mgmt_ipv4: 172.22.22.23
       group: tier-1
       startup-config: fabric/leaf3.cfg
-    leaf4:
-      kind: srl
-      mgmt_ipv4: 172.22.22.24
-      group: tier-1
-      startup-config: fabric/leaf4.cfg
     spine1:
       kind: srl
       mgmt_ipv4: 172.22.22.25
@@ -134,17 +129,11 @@ topology:
         - leaf3:e1-2
         - spine2:e1-3
     - endpoints:
-        - leaf4:e1-1
-        - spine1:e1-4
-    - endpoints:
-        - leaf4:e1-2
-        - spine2:e1-4
-    - endpoints:
         - client1:eth1
         - leaf1:e1-10
     - endpoints:
         - client2:eth1
-        - leaf3:e1-10
+        - leaf2:e1-10
     - endpoints:
         - client2:eth2
-        - leaf4:e1-10
+        - leaf3:e1-10
