@@ -1,0 +1,2 @@
+# import saved searches and dashboards (overwrites existing objects with the same name)
+curl -X POST 'http://localhost:5601/api/saved_objects/_import?overwrite=true' -H "kbn-xsrf: true" --form file=@elk/kibana/saved-objects.ndjson
