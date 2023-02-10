@@ -91,14 +91,14 @@ topology:
     #
     # CLIENTS
     #
-    cl11:
+    client1:
       kind: linux
       mgmt_ipv4: 172.22.22.31
       exec:
         - ip link set eth1 down
         - ip addr add 172.16.3.1/24 dev eth1
         - ip link set eth1 up
-    cl12:
+    client2:
       kind: linux
       mgmt_ipv4: 172.22.22.32
       exec:
@@ -140,11 +140,11 @@ topology:
         - leaf4:e1-2
         - spine2:e1-4
     - endpoints:
-        - cl11:eth1
+        - client1:eth1
         - leaf1:e1-10
     - endpoints:
-        - cl12:eth1
+        - client2:eth1
         - leaf3:e1-10
     - endpoints:
-        - cl12:eth2
+        - client2:eth2
         - leaf4:e1-10
