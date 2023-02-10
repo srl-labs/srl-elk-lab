@@ -1,97 +1,103 @@
 {
-  "template": "fabric-logs-*",
-  "version": 101,
-  "settings": {
-    "index.refresh_interval": "3s"
-  },
-  "mappings": {
-    "properties": {
-      "severity": {
-        "type": "long"
-      },
-      "srlnetinst": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
+  "index_patterns" : [
+    "fabric-logs-*"
+  ],
+  "priority" : 500,
+  "template" : {
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "1"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "severity": {
+          "type": "long"
+        },
+        "srlnetinst": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
           }
-        }
-      },
-      "pid": {
-        "type": "long"
-      },
-      "program": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
+        },
+        "pid": {
+          "type": "long"
+        },
+        "program": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
           }
-        }
-      },
-      "message": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
+        },
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
           }
-        }
-      },
-      "priority": {
-        "type": "long"
-      },
-      "tags": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
+        },
+        "priority": {
+          "type": "long"
+        },
+        "tags": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
           }
-        }
-      },
-      "sequence_id": {
-        "type": "long"
-      },
-      "initial": {
-        "type": "text"
-      },
-      "thread": {
-        "type": "long"
-      },
-      "@timestamp": {
-        "type": "date"
-      },
-      "host": {
-        "type": "ip",
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
+        },
+        "sequence_id": {
+          "type": "long"
+        },
+        "initial": {
+          "type": "text"
+        },
+        "thread": {
+          "type": "long"
+        },
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "type": "ip",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
           }
-        }
-      },
-      "subsystem": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "ignore_above": 256,
-            "type": "keyword"
+        },
+        "subsystem": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
           }
+        },
+        "facility": {
+          "type": "long"
+        },
+        "severity_label": {
+          "type": "keyword"
+        },
+        "facility_label": {
+          "type": "keyword"
+        },
+        "timestamp": {
+          "type": "text"
         }
-      },
-      "facility": {
-        "type": "long"
-      },
-      "severity_label": {
-        "type": "keyword"
-      },
-      "facility_label": {
-        "type": "keyword"
-      },
-      "timestamp": {
-        "type": "text"
       }
     }
   }
