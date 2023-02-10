@@ -19,40 +19,35 @@ topology:
     #
     # DC FABRIC
     #
-    srl-1-1:
+    leaf1:
       mgmt_ipv4: 172.22.22.21
       kind: srl
       group: tier-1
-      startup-config: fabric/srl-1-1.cfg
-    srl-1-2:
+      startup-config: fabric/leaf1.cfg
+    leaf2:
       kind: srl
       mgmt_ipv4: 172.22.22.22
       group: tier-1
-      startup-config: fabric/srl-1-2.cfg
-    srl-1-3:
+      startup-config: fabric/leaf2.cfg
+    leaf3:
       kind: srl
       mgmt_ipv4: 172.22.22.23
       group: tier-1
-      startup-config: fabric/srl-1-3.cfg
-    srl-1-4:
-      kind: srl
-      mgmt_ipv4: 172.22.22.24
-      group: tier-1
-      startup-config: fabric/srl-1-4.cfg
-    srl-2-1:
+      startup-config: fabric/leaf3.cfg
+    spine1:
       kind: srl
       mgmt_ipv4: 172.22.22.25
       group: tier-2
-      startup-config: fabric/srl-2-1.cfg
-    srl-2-2:
+      startup-config: fabric/spine1.cfg
+    spine2:
       kind: srl
       mgmt_ipv4: 172.22.22.26
       group: tier-2
-      startup-config: fabric/srl-2-2.cfg
+      startup-config: fabric/spine2.cfg
     #
     # ELK STACK
     #
-    es01:
+    elastic:
       kind: linux
       mgmt_ipv4: 172.22.22.10
       image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
@@ -74,9 +69,10 @@ topology:
         - ./elk/logstash/pipeline/:/usr/share/logstash/pipeline/
         - ./elk/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
         - ./elk/logstash/patterns:/var/lib/logstash/patterns
-        - ./elk/logstash/logs/:/logs/
+        - ./elk/logstash/logs/fail_to_parse_srl.log:/srl/fail_to_parse_srl.log
+        - ./elk/logstash/index-template.json:/tmp/index-template.json
       wait-for:
-        - es01
+        - elastic
     kibana:
       kind: linux
       mgmt_ipv4: 172.22.22.12
@@ -86,18 +82,18 @@ topology:
       ports:
         - 5601:5601/tcp
       wait-for:
-        - es01
+        - elastic
     #
     # CLIENTS
     #
-    cl11:
+    client1:
       kind: linux
       mgmt_ipv4: 172.22.22.31
       exec:
         - ip link set eth1 down
         - ip addr add 172.16.3.1/24 dev eth1
         - ip link set eth1 up
-    cl12:
+    client2:
       kind: linux
       mgmt_ipv4: 172.22.22.32
       exec:
@@ -115,35 +111,29 @@ topology:
   #
   links:
     - endpoints:
-        - srl-1-1:e1-1
-        - srl-2-1:e1-1
+        - leaf1:e1-1
+        - spine1:e1-1
     - endpoints:
-        - srl-1-1:e1-2
-        - srl-2-2:e1-1
+        - leaf1:e1-2
+        - spine2:e1-1
     - endpoints:
-        - srl-1-2:e1-1
-        - srl-2-1:e1-2
+        - leaf2:e1-1
+        - spine1:e1-2
     - endpoints:
-        - srl-1-2:e1-2
-        - srl-2-2:e1-2
+        - leaf2:e1-2
+        - spine2:e1-2
     - endpoints:
-        - srl-1-3:e1-1
-        - srl-2-1:e1-3
+        - leaf3:e1-1
+        - spine1:e1-3
     - endpoints:
-        - srl-1-3:e1-2
-        - srl-2-2:e1-3
+        - leaf3:e1-2
+        - spine2:e1-3
     - endpoints:
-        - srl-1-4:e1-1
-        - srl-2-1:e1-4
+        - client1:eth1
+        - leaf1:e1-10
     - endpoints:
-        - srl-1-4:e1-2
-        - srl-2-2:e1-4
+        - client2:eth1
+        - leaf2:e1-10
     - endpoints:
-        - cl11:eth1
-        - srl-1-1:e1-10
-    - endpoints:
-        - cl12:eth1
-        - srl-1-3:e1-10
-    - endpoints:
-        - cl12:eth2
-        - srl-1-4:e1-10
+        - client2:eth2
+        - leaf3:e1-10

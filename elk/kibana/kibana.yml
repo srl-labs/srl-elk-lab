@@ -40,8 +40,7 @@ server.name: "kibana"
 
 # =================== System: Elasticsearch ===================
 # The URLs of the Elasticsearch instances to use for all your queries.
-elasticsearch.hosts: ["http://es01:9200", "http://es02:9200", "http://es03:9200" ]
-
+elasticsearch.hosts: ["http://elastic:9200"]
 # If your Elasticsearch is protected with basic authentication, these settings provide
 # the username and password that the Kibana server uses to perform maintenance on the Kibana
 # index at startup. Your Kibana users still need to authenticate with Elasticsearch, which
