@@ -18,7 +18,7 @@
           }
         }
       },
-      "srlpid": {
+      "pid": {
         "type": "long"
       },
       "program": {
@@ -51,32 +51,28 @@
           }
         }
       },
-      "srlsequence": {
+      "sequence_id": {
         "type": "long"
       },
-      "srlthread": {
+      "initial": {
+        "type": "text"
+      },
+      "thread": {
         "type": "long"
       },
       "@timestamp": {
         "type": "date"
       },
       "host": {
-        "properties": {
-          "ip": {
-            "type": "ip",
-            "fields": {
-              "keyword": {
-                "ignore_above": 256,
-                "type": "keyword"
-              }
-            }
-          },
-          "name": {
+        "type": "ip",
+        "fields": {
+          "keyword": {
+            "ignore_above": 256,
             "type": "keyword"
           }
         }
       },
-      "srlproc": {
+      "subsystem": {
         "type": "text",
         "fields": {
           "keyword": {
