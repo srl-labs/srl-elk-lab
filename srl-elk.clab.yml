@@ -61,6 +61,7 @@ topology:
       kind: linux
       mgmt_ipv4: 172.22.22.11
       image: docker.elastic.co/logstash/logstash:7.17.7
+      cmd: --config.reload.automatic
       binds:
         - ./elk/logstash/pipeline/:/usr/share/logstash/pipeline/
         - ./elk/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
