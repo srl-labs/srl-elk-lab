@@ -111,7 +111,7 @@ set_value_all spine /network-instance[name="default"]/protocols/bgp/group[group-
 echo -e "$SEP Wait $WTIME sec... $SEP"
 sleep $WTIME
 
-echo -e "$SEP Shutdown active port for cl12 $SEP"
+echo -e "$SEP Shutdown active port for client2 $SEP"
 get_value leaf3 /interface[name=lag1]/oper-state | grep "up" > /dev/null && get_value leaf2 /interface[name=lag1]/oper-state | grep "down"
 if [ $? == 0 ]; then
     set_value leaf3 /interface[name=lag1]/admin-state disable
@@ -123,7 +123,7 @@ fi
 echo -e "$SEP Wait $WTIME sec... $SEP"
 sleep $WTIME
 
-echo -e "$SEP Unshut the port for cl12 $SEP"
+echo -e "$SEP Unshut the port for client2 $SEP"
 set_value leaf3 /interface[name=lag1]/admin-state enable
 set_value leaf2 /interface[name=lag1]/admin-state enable
 
