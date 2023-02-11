@@ -2,17 +2,16 @@
 WTIME=20
 NETWORK=`grep -E '^[ ]*network' srl-elk.clab.yml | sed -e 's/.*network[^:\/\/]*:[^:\/\/]//g;s/ //g'`
 SEP="***"
-LEAFS="1"
-SPINES="2"
+
 
 # Function defenitions == start ==
 function get_value (){
-    gnmic -d -a  srl-$1-$2 get --path $3 --values-only
+    gnmic -d -a $1 get --path $2 --values-only
 }
 
 function set_value (){
-    echo -e "\t$SEP Setting value for srl-$1-$2 $SEP"
-    RETVAL=`gnmic -d -a  srl-$1-$2 set --update-path $3  --update-value $4`
+    echo -e "\t$SEP Setting value for $1 $SEP"
+    RETVAL=`gnmic -d -a $1 set --update-path $2  --update-value $3`
     echo $RETVAL | grep -e '"operation": "UPDATE"' > /dev/null #2>&1 
     if [ $? == 0 ]; then
         echo -e "\t\tDONE"
@@ -24,10 +23,10 @@ function set_value (){
 function set_value_all (){
     LAST=2
     if [ $1 == 1 ]; then
-        LAST=4
+        LAST=3
     fi
     for i in `seq 1 $LAST`; do 
-        set_value $1 $i $2 $3
+        set_value $1$i $2 $3
     done
 }
 
@@ -38,18 +37,18 @@ function configure_syslog_for_all (){
     local SYSLOGCONFIG="sys_log_logstash.json"
     sed -e "s/LOGSTASHIP/$LOGSTASHIP/g" sys_log_logstash.json.tmpl > $SYSLOGCONFIG
     echo -e "$SEP Configuring $SYSLOGPATH for leafs $SEP"
-    replace_config_all $LEAFS $SYSLOGPATH $SYSLOGCONFIG
+    replace_config_all leaf $SYSLOGPATH $SYSLOGCONFIG
     echo -e "$SEP Configuring $SYSLOGPATH for spines $SEP"
-    replace_config_all $SPINES $SYSLOGPATH $SYSLOGCONFIG
+    replace_config_all spine $SYSLOGPATH $SYSLOGCONFIG
 }
 
 function update_config_all(){
     LAST=2
     if [ $1 == 1 ]; then
-        LAST=4
+        LAST=3
     fi
     for i in `seq 1 $LAST`; do 
-        local RETVAL=`gnmic -d -a  srl-$1-$i set --update-path $2 --update-file $3`
+        local RETVAL=`gnmic -d -a ${1}${i} set --update-path $2 --update-file $3`
         echo $RETVAL | grep -e '"operation": "UPDATE"' > /dev/null 2>&1 
         if [ $? == 0 ]; then
             echo -e "\tDONE"
@@ -96,58 +95,58 @@ for FLAG in "$@"; do
     esac
 done
 
-echo -e "$SEP Shutdown ibgp group on spine1 srl-2-1 $SEP"
-set_value $SPINES 1 /network-instance[name="default"]/protocols/bgp/group[group-name=ibgp-evpn]/admin-state disable
+echo -e "$SEP Shutdown ibgp group on spine1 $SEP"
+set_value spine1 /network-instance[name="default"]/protocols/bgp/group[group-name=ibgp-evpn]/admin-state disable
 
 echo -e "$SEP Wait $WTIME sec... $SEP"
 sleep $WTIME
-echo -e "$SEP Shutdown ibgp group on spine2 srl-2-2 $SEP"
-set_value $SPINES 2 /network-instance[name="default"]/protocols/bgp/group[group-name=ibgp-evpn]/admin-state disable
+echo -e "$SEP Shutdown ibgp group on spine2 $SEP"
+set_value spine2 /network-instance[name="default"]/protocols/bgp/group[group-name=ibgp-evpn]/admin-state disable
 
 echo -e "$SEP Wait $WTIME sec... $SEP"
 sleep $WTIME
-echo -e "$SEP Bring up ibgp group on spine1 and spine2 srl-2-1/2 $SEP"
-set_value_all $SPINES /network-instance[name="default"]/protocols/bgp/group[group-name=ibgp-evpn]/admin-state enable
+echo -e "$SEP Bring up ibgp group on spine1 and spine2 $SEP"
+set_value_all spine /network-instance[name="default"]/protocols/bgp/group[group-name=ibgp-evpn]/admin-state enable
 
 echo -e "$SEP Wait $WTIME sec... $SEP"
 sleep $WTIME
 
 echo -e "$SEP Shutdown active port for cl12 $SEP"
-get_value $LEAFS 3 /interface[name=lag1]/oper-state | grep "up" > /dev/null && get_value $LEAFS 4 /interface[name=lag1]/oper-state | grep "down"
+get_value leaf3 /interface[name=lag1]/oper-state | grep "up" > /dev/null && get_value leaf2 /interface[name=lag1]/oper-state | grep "down"
 if [ $? == 0 ]; then
-    set_value $LEAFS 3 /interface[name=lag1]/admin-state disable
+    set_value leaf3 /interface[name=lag1]/admin-state disable
 else
-    echo -e "\tPort in not operationaly active shutting down port on leaf4"
-    set_value $LEAFS 4 /interface[name=lag1]/admin-state disable
+    echo -e "\tPort in not operationaly active shutting down port on leaf2"
+    set_value leaf2 /interface[name=lag1]/admin-state disable
 fi
 
 echo -e "$SEP Wait $WTIME sec... $SEP"
 sleep $WTIME
 
 echo -e "$SEP Unshut the port for cl12 $SEP"
-set_value $LEAFS 3 /interface[name=lag1]/admin-state enable
-set_value $LEAFS 4 /interface[name=lag1]/admin-state enable
+set_value leaf3 /interface[name=lag1]/admin-state enable
+set_value leaf2 /interface[name=lag1]/admin-state enable
 
 echo -e "$SEP Round-robin shut/noshut spine ports for"
-echo -e "\tspine1 srl-2-1"
-for i in `seq 1 6` ; do
-    set_value $SPINES 1 /interface[name="ethernet-1/$i"]/admin-state disable
+echo -e "\tspine1"
+for i in `seq 1 3` ; do
+    set_value spine1 /interface[name="ethernet-1/$i"]/admin-state disable
     sleep 2
 done 
 
-for i in `seq 1 6` ; do
-    set_value $SPINES 1 /interface[name="ethernet-1/$i"]/admin-state enable
+for i in `seq 1 3` ; do
+    set_value spine1 /interface[name="ethernet-1/$i"]/admin-state enable
     sleep 2
 done 
 sleep 5
-echo -e "\tand spine2 srl-2-2 $SEP"
-for i in `seq 1 6` ; do
-    set_value $SPINES 2 /interface[name="ethernet-1/$i"]/admin-state disable
+echo -e "\tand spine2 $SEP"
+for i in `seq 1 3` ; do
+    set_value spine2 /interface[name="ethernet-1/$i"]/admin-state disable
     sleep 2
 done 
 
-for i in `seq 1 6` ; do
-    set_value $SPINES 2 /interface[name="ethernet-1/$i"]/admin-state enable
+for i in `seq 1 3` ; do
+    set_value spine2 /interface[name="ethernet-1/$i"]/admin-state enable
     sleep 2
 done 
 
@@ -156,8 +155,8 @@ echo -e "$SEP Wait $WTIME sec... $SEP"
 sleep $WTIME
 
 echo -e "$SEP Triggering LLDP on leafs"
-set_value_all $LEAFS /system/lldp/admin-state disable
+set_value_all leaf /system/lldp/admin-state disable
 sleep $WTIME
-set_value_all $LEAFS /system/lldp/admin-state enable
+set_value_all leaf /system/lldp/admin-state enable
 
 

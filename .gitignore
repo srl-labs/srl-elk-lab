@@ -3,3 +3,4 @@ elk/logstash/logs/*
 blog.back
 clab-*
 .*y*ml.bak
+*.back

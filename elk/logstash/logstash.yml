@@ -1,6 +1,7 @@
 node.name: logstash
 pipeline.workers: 4
 pipeline.batch.size: 256
+pipeline.ecs_compatibility: v1
 path.config: "/usr/share/logstash/pipeline/*.main.conf"
 queue.type: persisted
 # path.queue: /logs/pqueue

@@ -2,8 +2,8 @@ username: admin
 password: admin
 log-file: ./gnmic.log
 tls-ca: ./clab-elk/ca/root/root-ca.pem
-tls-cert: ./clab-elk/ca/srl-2-2/srl-2-2.pem 
-tls-key: ./clab-elk/ca/srl-2-2/srl-2-2-key.pem
+tls-cert: ./clab-elk/ca/spine2/spine2.pem
+tls-key: ./clab-elk/ca/spine2/spine2-key.pem
 skip-verify: true
 timeout: 30s
 encoding: json_ietf
