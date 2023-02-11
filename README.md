@@ -16,12 +16,11 @@ clab topology represents 2-tier fabric topology and with 2 containers sitting wi
 
 
 Naming conventions are very simple:
-* srl-1-* - leafs,
-* srl-2-* - spines.
-cl11 connectivity is using one interface attached to leaf1 (srl-1-1).
-cl12 is connected as A/S to leaf3 (srl-1-3) and leaf4 (srl-1-4) with standby link signalling using LACP.
-spine1 (srl-2-1) and spine2 (srl-2-2) are acting as BGP RR.
-This setup is more than enough to demonstrate the way to integrate fabric with ELK stack.
+* leaf[1-3] - leafs,
+* spine[1,2] - spines.
+client1 connectivity is using one interface attached to leaf1.
+client2 is connected as A/S to leaf3 and leaf2 with standby link signalling using LACP.
+spine1 and spine2 are acting as BGP RR. This setup is more than enough to demonstrate a way to integrate fabric with ELK stack.
 
 # Quick start 
 
@@ -41,20 +40,45 @@ cd <lab folder>
 sudo clab deploy -t srl-elk.clab.yml
 ```
 
-3. Create index template (to avoid automatic template creation by elastic)
+3. For the fast and convenient start of demo, dashboard and discover search configuration [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of the lab.
+
+In order to have dashboard in Kibana necessary objects should be imported to avoid manual import. 
 
 ```sh
-curl -X PUT "localhost:9200/_index_template/fabric?pretty" -H 'Content-Type: application/json' -d @elk/logstash/index-template.json 
+./add-saved-objects.sh
 ```
 
-4. Import Kibana templates as described in [Kibana](#kibana) section. Kibana should available via [http://localhost:5601](http://localhost:5601)
+Demo dashboard can be adjusted as necessary.
 
-5. Delete index created initially since it does not follow mappings and could not be adjusted any longer.
+4. Run simulation to quickly ingest data into elasticsearch as described in [Simulation](#simulation)
 
-![Kibana delete index][index_deletion]
 
-5. Run simulation to quickly ingest data into elasticsearch as described in [Simulation](#simulation)
+> Note! Index template is created automatically by logstash (to avoid automatic template creation by elastic).
+> `manage_template` and `template*` configuration option stanzas are defining such logstash behavior.
 
+```r
+output {
+    if "srlinux" in [tags] {
+        if "_grokparsefailure" in [tags] {
+            file {
+                path => "/srl/fail_to_parse_srl.log"
+                codec => rubydebug
+            }
+        } else {
+            elasticsearch {
+                hosts => ["http://elastic"]
+                ssl => false
+                index => "fabric-logs-%{+YYYY.MM.dd}"
+                manage_template => true
+                template => "/tmp/index-template.json"
+                template_name => "fabric-template"
+                template_overwrite => true
+                id => "fabric-logs"
+            }
+        }
+    }
+}
+```
 
 # Simulation
 
@@ -62,7 +86,7 @@ In order to help quickly enrich ELK stack with logs ```outage_simulation.sh``` s
 
 ```-S``` - to replace configuration for logstash remote server under ```/system/logging/remote-server[host=$LOGSTASHIP]"``` with new one.
 
-```<WAITTIMER>``` - to adjust time interval between destructive actions applied (10 sec by default).
+```<WAITTIMER>``` - to adjust time interval between destructive actions applied (20 sec by default).
 
 Basic configuration can found [here](./sys_log_logstash.json.tmpl), which represent default lab configuration, and can be adjusted per your needs and requirements.
 
@@ -92,8 +116,7 @@ By default configuration for remote server using UDP:
 <...output omitted for brevity...>
     }
 ```
-In case TLS is a requirement, you can consider to put rsyslog in front, simple docker image with self-signed and custom certificate can be found on [github.com/azyablov/rsyslogbase](https://github.com/azyablov/rsyslogbase)
-
+> Note! In case TLS is a requirement, you can consider to put rsyslog in front, simple docker image with self-signed and custom certificate can be found on [github.com/azyablov/rsyslogbase](https://github.com/azyablov/rsyslogbase)
 
 To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simulation.sh 15``` in case machine is a bit slow or you have another labs running on the same compute.
 
@@ -101,12 +124,8 @@ To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simul
 
 # Kibana
 
-For the fast and convenient start of demo dashboard and discover search configuration [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of this lab.
-It could be added in few clicks using Kibana import under Stack Management.
-
-![kibana import][kibaba_stask_mgmt]
-
-Then you can go to to Discovery and Dashboard under Analytics and see simple dashboard.
+Your pre-configured Kibana should available via [http://localhost:5601](http://localhost:5601).
+Now you can go to to Discovery and Dashboard under Analytics and see a demo dashboard.
 
 ![kibana discovery][kibaba_dashboard]
 
@@ -118,4 +137,4 @@ Then you can go to to Discovery and Dashboard under Analytics and see simple das
 [kibaba_dashboard]: ./pic/kibana_dashboard.png "Kibana dashboard #1"
 [kibaba_dashboard_2]: ./pic/kibana_dashboard_2.png "Kibana dashboard #2"
 [index_deletion]: ./pic/delete_index.png "Kibana delete index"
-[outage_simulation]: ./pic/outage_smulation.gif "Simulation"
+[outage_simulation]: ./pic/outage_simulation.gif "Simulation"
