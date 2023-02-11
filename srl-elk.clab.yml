@@ -55,10 +55,6 @@ topology:
         node.name: es01
         discovery.type: single-node
         ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-      binds:
-        # Uncomment line below in case persistency needed across lab deployments / destroys
-        # - ./elk/elasticsearch_data01:/usr/share/elasticsearch/data
-        - elk/logstash/index-template.json:/tmp/index-template.json
       ports:
         - 9200:9200/tcp
     logstash:
