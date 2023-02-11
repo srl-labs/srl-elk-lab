@@ -42,7 +42,7 @@ sudo clab deploy -t srl-elk.clab.yml
 
 3. For the fast and convenient start of demo, dashboard and discover search configuration [objects](./elk/kibana/kibana-dashboard.ndjson) are provided as part of the lab.
 
-In order to have dashboard in Kibana necessary objects should be imported to avoid manual import. 
+Run `add-saved-objects.sh` in order to avoid manual import and creation.
 
 ```sh
 ./add-saved-objects.sh
