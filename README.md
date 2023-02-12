@@ -136,3 +136,4 @@ Now you can go to to Discovery and Dashboard under Analytics and see a demo dash
 [kibaba_dashboard_2]: ./pic/kibana_dashboard_2.png "Kibana dashboard #2"
 [outage_simulation]: ./pic/outage_simulation.gif "Simulation"
 [srk-with-elk-post]: https://learn.srlinux.dev/blog/2023/sr-linux-logging-with-elk/
+[topology]: ./pic/topology.png
