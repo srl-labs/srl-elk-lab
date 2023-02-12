@@ -6,7 +6,24 @@ A series of blog posts go into the details of various ELK deployment models:
 
 1. [SR Linux logging with ELK][srk-with-elk-post] - an introduction to the modern logging infrastructure using ELK stack.
 
-# Quick start
+## Lab Topology
+
+The [srl-elk.clab.yml](srl-elk.clab.yml) topology represents a 2-tier Clos fabric with 2 clients participating in a single L2 EVPN domain.
+
+![ELK lab topology][topology]
+
+Naming conventions are straighforward:
+
+* leaf[1-3] - leaves
+* spine[1,2] - spines
+* client[1,2] - emulated clients
+
+client1 connectivity uses a single interface attached to leaf1.
+client2 is connected as A/S to leaf2 and leaf3 with standby link signalling using LACP.
+
+spine1 and spine2 are acting as BGP RR. This setup is sufficient to demonstrate a way to integrate a fabric with ELK stack.
+
+## Quick start
 
 In order to bring up your lab follow the next simple steps:
 
@@ -63,7 +80,7 @@ output {
 }
 ```
 
-# Simulation
+## Simulation
 
 In order to help quickly enrich ELK stack with logs ```outage_simulation.sh``` script could be executed with the following parameters:
 
@@ -106,7 +123,7 @@ To run simulation just execute ```./outage_simulation.sh``` or ```./outage_simul
 
 ![Outage Simulation][outage_simulation]
 
-# Kibana
+## Kibana
 
 Your pre-configured Kibana should available via [http://localhost:5601](http://localhost:5601).
 Now you can go to to Discovery and Dashboard under Analytics and see a demo dashboard.
