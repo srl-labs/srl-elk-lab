@@ -1,5 +1,5 @@
 username: admin
-password: admin
+password: NokiaSrl1!
 log-file: ./gnmic.log
 tls-ca: ./clab-elk/ca/root/root-ca.pem
 tls-cert: ./clab-elk/ca/spine2/spine2.pem
