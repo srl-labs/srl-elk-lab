@@ -60,12 +60,6 @@ topology:
         ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       ports:
         - 9200:9200/tcp
-      # healthcheck:
-      #   start-period: 5
-      #   interval: 1
-      #   test:
-      #     - CMD-SHELL
-      #     - ls
     logstash:
       kind: linux
       mgmt-ipv4: 172.22.22.11
