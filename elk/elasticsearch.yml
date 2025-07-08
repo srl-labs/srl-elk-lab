@@ -1,0 +1,6 @@
+xpack.security.http.ssl.enabled: false # no TLS!
+xpack.security.enabled: false  # no auth!
+cluster.name: escluster # name of the cluster
+node.name: elastic
+network.host: 0.0.0.0  # listen on all interfaces
+http.port: 9200

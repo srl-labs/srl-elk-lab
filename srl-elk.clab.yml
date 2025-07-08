@@ -53,24 +53,25 @@ topology:
     elastic:
       kind: linux
       mgmt-ipv4: 172.22.22.10
-      image: docker.elastic.co/elasticsearch/elasticsearch:7.17.7
+      image: docker.elastic.co/elasticsearch/elasticsearch:8.18.3
       env:
-        node.name: es01
+        node.name: elastic
         discovery.type: single-node
         ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      binds:
+        - ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       ports:
         - 9200:9200/tcp
     logstash:
       kind: linux
       mgmt-ipv4: 172.22.22.11
-      image: docker.elastic.co/logstash/logstash:7.17.7
+      image: docker.elastic.co/logstash/logstash:8.18.3
       cmd: --config.reload.automatic
       binds:
         - ./elk/logstash/pipeline/:/usr/share/logstash/pipeline/
         - ./elk/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
         - ./elk/logstash/patterns:/var/lib/logstash/patterns
         - ./elk/logstash/logs/fail_to_parse_srl.log:/srl/fail_to_parse_srl.log
-        - ./elk/logstash/index-template.json:/tmp/index-template.json
       stages:
         create:
           wait-for:
@@ -80,7 +81,7 @@ topology:
     kibana:
       kind: linux
       mgmt-ipv4: 172.22.22.12
-      image: docker.elastic.co/kibana/kibana:7.17.7
+      image: docker.elastic.co/kibana/kibana:8.18.3
       binds:
         - ./elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
       ports:
@@ -90,6 +91,21 @@ topology:
           wait-for:
            - node: elastic
              stage: configure
+    #
+    # SYSLOG, for debug and test purposes
+    #
+    syslog:
+      kind: linux
+      image: harbor.nice.nokia.net/docker/linuxserver/syslog-ng:4.8.1
+      binds:
+        - /etc/localtime:/etc/localtime:ro
+        - syslog/syslog-ng.conf:/config/syslog-ng.conf
+        - logs:/var/log
+      env:
+        PUID: "0"
+        PGID: "0"
+      mgmt-ipv4: 172.22.22.41
+      restart-policy: unless-stopped
     #
     # CLIENTS
     #
