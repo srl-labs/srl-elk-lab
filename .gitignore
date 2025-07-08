@@ -5,3 +5,8 @@ clab-*
 .*y*ml.bak
 *.back
 gnmic.log
+.backup
+*.log
+*.pid
+*.swp
+*.swpx
