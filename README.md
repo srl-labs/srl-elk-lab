@@ -132,8 +132,8 @@ Now you can go to to Discovery and Dashboard under Analytics and see a demo dash
 
 ![kibana dashboard][kibaba_dashboard_2]
 
-[kibaba_dashboard]: ./pic/kibana_dashboard.png "Kibana dashboard #1"
-[kibaba_dashboard_2]: ./pic/kibana_dashboard_2.png "Kibana dashboard #2"
+[kibaba_dashboard]: ./pic/kibana_dashboard_3.png "Kibana dashboard #1"
+[kibaba_dashboard_2]: ./pic/kibana_dashboard_4.png "Kibana dashboard #2"
 [outage_simulation]: ./pic/outage_simulation.gif "Simulation"
 [srk-with-elk-post]: https://learn.srlinux.dev/blog/2023/sr-linux-logging-with-elk/
 [topology]: ./pic/topology.png
