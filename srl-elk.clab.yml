@@ -13,7 +13,7 @@ topology:
       stages:
         create:
           wait-for:
-            - node: kibana
+            - node: provisioner
               stage: configure
     linux:
       image: ghcr.io/hellt/network-multitool
@@ -58,34 +58,67 @@ topology:
         node.name: elastic
         discovery.type: single-node
         ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+        ELASTIC_PASSWORD: "BIGsecret"
       binds:
         - ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+        - clab-elk/.tls:/usr/share/elasticsearch/config/tls:ro
       ports:
         - 9200:9200/tcp
+      certificate:
+        issue: true
+        key-size: 4096
+        validity-duration: 168h
+        sans:
+          - "elastic"
+          - 172.22.22.10
+    #
+    # Logstash, to consume and transform logs
+    #
     logstash:
       kind: linux
       mgmt-ipv4: 172.22.22.11
       image: docker.elastic.co/logstash/logstash:8.18.3
       cmd: --config.reload.automatic
+      env:
+        ELASTICSEARCH_HOST: "elastic"
+        ELASTICSEARCH_PORT: "9200"
+        LOGSTASH_PASSWORD: "BIGsecret"
+        ELASTIC_PASSWORD: "BIGsecret"
+        ELASTICSEARCH_URL: "https://elastic:9200"
       binds:
         - ./elk/logstash/pipeline/:/usr/share/logstash/pipeline/
         - ./elk/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
         - ./elk/logstash/patterns:/var/lib/logstash/patterns
-        - ./elk/logstash/logs/fail_to_parse_srl.log:/srl/fail_to_parse_srl.log
+        - ./elk/logstash/logs/fail_to_parse_srl.log:/srl/fail_to_parse_srl.log # in case grok unable to parse it
+        - clab-elk/.tls:/usr/share/logstash/config/tls:ro
       stages:
         create:
           wait-for:
             - node: elastic
               stage: configure
-
+    #
+    # Kibana, to visualize logs
+    #
     kibana:
       kind: linux
       mgmt-ipv4: 172.22.22.12
       image: docker.elastic.co/kibana/kibana:8.18.3
+      env:
+        ELASTICSEARCH_USERNAME: "kibana_system"
+        ELASTICSEARCH_PASSWORD: "BIGsecret"
+        ELASTICSEARCH_URL: "https://elastic:9200"
       binds:
-        - ./elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+        - elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+        - clab-elk/.tls:/usr/share/kibana/config/tls:ro
       ports:
         - 5601:5601/tcp
+      certificate:
+        issue: true
+        key-size: 4096
+        validity-duration: 168h
+        sans:
+          - "kibana"
+          - 172.22.22.12
       stages:
         create:
           wait-for:
@@ -106,6 +139,24 @@ topology:
         PGID: "0"
       mgmt-ipv4: 172.22.22.41
       restart-policy: unless-stopped
+    #
+    # Provisioning client
+    #
+    provisioner:
+      kind: linux
+      mgmt-ipv4: 172.22.22.42
+      env:
+        ELASTIC_PASSWORD: "BIGsecret"
+        KIBANA_SYSTEM_PASS: "BIGsecret"
+        LOGSTASH_SYSTEM_PASS: "BIGsecret"
+        ELASTICSEARCH_URL: "https://elastic:9200" # clab default
+        KIBANA_URL: "https://kibana:5601" # clab default
+      exec:
+        - /scripts/provisioner.sh
+      binds:
+        - elk/scripts/:/scripts/:ro
+        - clab-elk/.tls:/tls:ro
+      startup-delay: 30 # wait for ELK stack to be up, fine tune in case performance is not good enough to bring ELK stack quickly
     #
     # CLIENTS
     #

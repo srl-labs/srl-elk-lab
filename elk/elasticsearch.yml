@@ -1,6 +1,11 @@
-xpack.security.http.ssl.enabled: false # no TLS!
-xpack.security.enabled: false  # no auth!
 cluster.name: escluster # name of the cluster
 node.name: elastic
 network.host: 0.0.0.0  # listen on all interfaces
 http.port: 9200
+bootstrap.memory_lock: true
+xpack.ml.use_auto_machine_memory_percent: true
+xpack.security.enabled: true # ELASTIC_PASSWORD is in env, kibana and logstash built-in account passwords will be provisioned by provisioner
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.certificate: /usr/share/elasticsearch/config/tls/elastic/elastic.pem
+xpack.security.http.ssl.key: /usr/share/elasticsearch/config/tls/elastic/elastic.key
+xpack.security.http.ssl.certificate_authorities: [ "/usr/share/elasticsearch/config/tls/ca/ca.pem" ]
